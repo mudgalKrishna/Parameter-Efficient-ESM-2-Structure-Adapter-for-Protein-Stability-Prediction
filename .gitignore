@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.env
+.venv/
+venv/
+*.pt
+*.pth
+*.ckpt
+*.zip
+*.parquet
+checkpoints/
+xfer150/
+xfer650/
