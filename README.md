@@ -28,7 +28,7 @@ The best-performing configuration in our experiments combines ESM-2 650M, LoRA, 
 - **Structure adapter:** A small trainable component that combines the sequence information from ESM-2 with the structural information from ProteinMPNN.
 - **Prediction head:** The final regression layer that turns the learned representation into a numerical ΔΔG prediction.
 
-In everyday terms, ESM-2 helps the model understand the protein's sequence, the structure branch adds information about the protein's shape, and the final layers learn how those signals relate to measured stability changes.
+ESM-2 provides sequence information, ProteinMPNN provides structure information, and the prediction layers learn how these relate to measured changes in stability.
 
 We also tested sequence-only models, models with different training strategies, simpler feature-based baselines, and homology-filtered experiments to understand which parts of the approach were useful.
 
@@ -133,7 +133,7 @@ These comparisons help separate the benefit of training ESM-2 from the extra con
 
 ## 10. Repository files
 
-The repository includes the supporting pipeline bundle. Inside `updated_pipeline_bundle.zip` are the main scripts and experiment records, including:
+The repository package contains this README and `updated_pipeline_bundle.zip`. The bundle includes the main scripts and experiment records, including:
 
 - `train.py` and `train_esm2_spurs_fixed.py` — training entry points.
 - `pipeline.py` — supporting pipeline code.
@@ -144,7 +144,7 @@ The repository includes the supporting pipeline bundle. Inside `updated_pipeline
 - `experiment_trace_manifest.json` and `esm2_finetune_audit_summary.json` — experiment and data-audit records.
 - `separate_25_30_identity_experiment.csv` and `proteins_with_seq_identity_clusters.csv` — homology-related experiment records.
 
-The repository also contains the full experiment report separately from this short project overview in the supporting materials used to prepare the results.
+The ZIP bundle does not include the Word project report. The code and experiment records needed to inspect the reported results are listed above.
 
 ## 11. Reproducibility and data checks
 
