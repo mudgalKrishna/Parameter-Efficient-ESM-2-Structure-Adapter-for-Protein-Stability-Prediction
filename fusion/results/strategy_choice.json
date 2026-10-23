@@ -1,0 +1,13 @@
+{
+ "chosen_strategy": "greedy_val",
+ "trainval_helps": false,
+ "per_strategy_fold_test_median": {
+  "all_avg": 0.8469,
+  "greedy_val": 0.8475,
+  "single_best": 0.845,
+  "top2_avg": 0.8474,
+  "top3_avg": 0.8471,
+  "top4_avg": 0.8469
+ },
+ "n_folds": 5
+}

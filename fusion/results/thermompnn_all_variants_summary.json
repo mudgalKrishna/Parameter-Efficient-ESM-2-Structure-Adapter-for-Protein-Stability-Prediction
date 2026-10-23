@@ -1,0 +1,11 @@
+{
+  "rows": 271231,
+  "proteins": 298,
+  "by_split": {
+    "test": 28172,
+    "train": 215731,
+    "val": 27328
+  },
+  "pearson_vs_ddG_ML_all": -0.8633430175391095,
+  "elapsed_seconds": 63.0
+}

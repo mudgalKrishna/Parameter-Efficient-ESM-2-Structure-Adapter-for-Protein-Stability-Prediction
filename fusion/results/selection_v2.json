@@ -1,0 +1,9 @@
+{
+ "members": [
+  "R2_rankhi",
+  "R7_mpnnft"
+ ],
+ "val_mean_spearman": 0.8527660557037566,
+ "val_median_spearman": 0.8722864638185212,
+ "single_best_config": "R1_rank"
+}

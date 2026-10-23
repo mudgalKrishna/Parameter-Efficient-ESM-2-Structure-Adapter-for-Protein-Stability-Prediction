@@ -1,0 +1,125 @@
+{
+ "args": {
+  "tag": "R2_rankhi",
+  "seed": 0,
+  "esm": "facebook/esm2_t36_3B_UR50D",
+  "esm_bf16": 0,
+  "use_esm": 1,
+  "use_mpnn": 1,
+  "mpnn_ver": "v_48_020",
+  "mpnn_lr": 0.0,
+  "lora_rank": 32,
+  "lora_lr": 0.0002,
+  "head_lr": 0.0005,
+  "wd": 0.01,
+  "epochs": 40,
+  "patience": 10,
+  "batch": 8,
+  "corr_w": 1.0,
+  "rank_w": 2.0,
+  "aux_w": 0.0,
+  "fuse_layers": 2,
+  "fuse_mode": "concat",
+  "aug_eps": 0.0,
+  "tta": 0,
+  "grad_ckpt": 0,
+  "split": "mega",
+  "train_on": "train",
+  "fixed_epochs": 0
+ },
+ "best_val_median_spearman": 0.8690154085500076,
+ "best_epoch": 4,
+ "n_fit_proteins": 239,
+ "history": [
+  {
+   "epoch": 0,
+   "train_loss": 2.1490752397720785,
+   "val_median_spearman": 0.7216646422432497,
+   "t": 8
+  },
+  {
+   "epoch": 1,
+   "train_loss": 1.608914332409783,
+   "val_median_spearman": 0.8140883741920818,
+   "t": 16
+  },
+  {
+   "epoch": 2,
+   "train_loss": 1.3546190650892058,
+   "val_median_spearman": 0.8501823382404055,
+   "t": 23
+  },
+  {
+   "epoch": 3,
+   "train_loss": 1.2062796005145275,
+   "val_median_spearman": 0.8560784921206052,
+   "t": 31
+  },
+  {
+   "epoch": 4,
+   "train_loss": 1.1145288669913385,
+   "val_median_spearman": 0.8690154085500076,
+   "t": 35
+  },
+  {
+   "epoch": 5,
+   "train_loss": 1.069241433961621,
+   "val_median_spearman": 0.8590986688475649,
+   "t": 39
+  },
+  {
+   "epoch": 6,
+   "train_loss": 1.019433396630706,
+   "val_median_spearman": 0.8612802624764644,
+   "t": 43
+  },
+  {
+   "epoch": 7,
+   "train_loss": 0.9791453560525902,
+   "val_median_spearman": 0.8612532487387579,
+   "t": 46
+  },
+  {
+   "epoch": 8,
+   "train_loss": 0.9530257385644952,
+   "val_median_spearman": 0.8607205214549148,
+   "t": 50
+  },
+  {
+   "epoch": 9,
+   "train_loss": 0.9330044224172457,
+   "val_median_spearman": 0.8634009638170318,
+   "t": 56
+  },
+  {
+   "epoch": 10,
+   "train_loss": 0.9155182933208833,
+   "val_median_spearman": 0.8543748113522972,
+   "t": 63
+  },
+  {
+   "epoch": 11,
+   "train_loss": 0.9059902252512497,
+   "val_median_spearman": 0.855484080267909,
+   "t": 70
+  },
+  {
+   "epoch": 12,
+   "train_loss": 0.8886187989342662,
+   "val_median_spearman": 0.8663048475319747,
+   "t": 77
+  },
+  {
+   "epoch": 13,
+   "train_loss": 0.8753472214962149,
+   "val_median_spearman": 0.8619657524682013,
+   "t": 84
+  },
+  {
+   "epoch": 14,
+   "train_loss": 0.8667019475952851,
+   "val_median_spearman": 0.8621845146585699,
+   "t": 91
+  }
+ ]
+}

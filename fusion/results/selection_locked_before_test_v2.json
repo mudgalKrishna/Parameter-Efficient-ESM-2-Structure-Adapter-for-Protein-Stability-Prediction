@@ -1,0 +1,13 @@
+{
+ "strategy": "greedy_val",
+ "strategy_chosen_on": "5 CV folds (see strategy_choice.json)",
+ "members": [
+  "R2_rankhi",
+  "R8_15B_rank"
+ ],
+ "n_configs_available": 10,
+ "val_median_spearman": 0.8818765777773019,
+ "val_mean_spearman": 0.8617655737354248,
+ "single_best_config": "R7_mpnnft",
+ "retrain_on_trainval": false
+}

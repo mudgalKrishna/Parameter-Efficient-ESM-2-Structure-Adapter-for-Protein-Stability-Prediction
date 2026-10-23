@@ -1,0 +1,128 @@
+{
+ "cv_folds": {
+  "n_folds": 5,
+  "folds_won": 5,
+  "mean_delta_median": 0.0607,
+  "ours_mean_median": 0.8475,
+  "thermo_mean_median": 0.7868,
+  "per_fold": [
+   {
+    "comparison": "cv0: ours vs ThermoMPNN retrained (same fold-train)",
+    "n_proteins": 51,
+    "ours_median": 0.8487,
+    "ref_median": 0.7808,
+    "delta_median": 0.0678,
+    "ci95": [
+     0.04,
+     0.084
+    ],
+    "mean_delta": 0.0532,
+    "wins": 44,
+    "wilcoxon_p": 1.041788429097798e-06,
+    "thermo_seeds": 5,
+    "our_members": 1
+   },
+   {
+    "comparison": "cv1: ours vs ThermoMPNN retrained (same fold-train)",
+    "n_proteins": 59,
+    "ours_median": 0.8108,
+    "ref_median": 0.7727,
+    "delta_median": 0.0382,
+    "ci95": [
+     0.0217,
+     0.055
+    ],
+    "mean_delta": 0.0295,
+    "wins": 46,
+    "wilcoxon_p": 0.0004613277191674472,
+    "thermo_seeds": 5,
+    "our_members": 4
+   },
+   {
+    "comparison": "cv2: ours vs ThermoMPNN retrained (same fold-train)",
+    "n_proteins": 63,
+    "ours_median": 0.8487,
+    "ref_median": 0.7777,
+    "delta_median": 0.071,
+    "ci95": [
+     0.0509,
+     0.0921
+    ],
+    "mean_delta": 0.0702,
+    "wins": 55,
+    "wilcoxon_p": 2.18399765953991e-09,
+    "thermo_seeds": 5,
+    "our_members": 3
+   },
+   {
+    "comparison": "cv3: ours vs ThermoMPNN retrained (same fold-train)",
+    "n_proteins": 63,
+    "ours_median": 0.8602,
+    "ref_median": 0.8017,
+    "delta_median": 0.0585,
+    "ci95": [
+     0.0448,
+     0.0882
+    ],
+    "mean_delta": 0.0656,
+    "wins": 56,
+    "wilcoxon_p": 3.758275415567338e-09,
+    "thermo_seeds": 5,
+    "our_members": 2
+   },
+   {
+    "comparison": "cv4: ours vs ThermoMPNN retrained (same fold-train)",
+    "n_proteins": 62,
+    "ours_median": 0.869,
+    "ref_median": 0.8011,
+    "delta_median": 0.0679,
+    "ci95": [
+     0.051,
+     0.0832
+    ],
+    "mean_delta": 0.0634,
+    "wins": 58,
+    "wilcoxon_p": 6.541293708694104e-11,
+    "thermo_seeds": 5,
+    "our_members": 3
+   }
+  ]
+ },
+ "official_test": {
+  "locked_members": [
+   "R2_rankhi",
+   "R8_15B_rank"
+  ],
+  "thermo_retrain_seeds": 5,
+  "results": [
+   {
+    "comparison": "official test: ours vs ThermoMPNN RELEASED weights",
+    "n_proteins": 28,
+    "ours_median": 0.8349,
+    "ref_median": 0.772,
+    "delta_median": 0.0629,
+    "ci95": [
+     0.0293,
+     0.0854
+    ],
+    "mean_delta": 0.0429,
+    "wins": 21,
+    "wilcoxon_p": 0.0005833879113197327
+   },
+   {
+    "comparison": "official test: ours vs ThermoMPNN RETRAINED (same protocol)",
+    "n_proteins": 28,
+    "ours_median": 0.8349,
+    "ref_median": 0.7685,
+    "delta_median": 0.0664,
+    "ci95": [
+     0.036,
+     0.0895
+    ],
+    "mean_delta": 0.0452,
+    "wins": 21,
+    "wilcoxon_p": 0.00027351081371307373
+   }
+  ]
+ }
+}

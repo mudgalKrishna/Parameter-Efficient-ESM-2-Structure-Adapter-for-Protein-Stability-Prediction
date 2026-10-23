@@ -1,0 +1,89 @@
+--tag R0_repro --seed 0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R0_repro --seed 1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R0_repro --seed 2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R1_rank --seed 0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R2_rankhi --seed 0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R2_rankhi --seed 1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R2_rankhi --seed 2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R3_aux --seed 0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --aux_w 0.1
+--tag R3_aux --seed 1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --aux_w 0.1
+--tag R3_aux --seed 2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --aux_w 0.1
+--tag R4_xattn --seed 0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --fuse_mode xattn
+--tag R4_xattn --seed 1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --fuse_mode xattn
+--tag R4_xattn --seed 2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --fuse_mode xattn
+--tag R5_tta --seed 0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --aug_eps 0.1 --tta 4
+--tag R5_tta --seed 1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --aug_eps 0.1 --tta 4
+--tag R5_tta --seed 2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --aug_eps 0.1 --tta 4
+--tag R6_all --seed 0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --aux_w 0.1 --aug_eps 0.1 --tta 4
+--tag R6_all --seed 1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --aux_w 0.1 --aug_eps 0.1 --tta 4
+--tag R6_all --seed 2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --aux_w 0.1 --aug_eps 0.1 --tta 4
+--tag R7_mpnnft --seed 0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R7_mpnnft --seed 1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R7_mpnnft --seed 2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R0_repro --seed 0 --split cv0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R0_repro --seed 1 --split cv0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R0_repro --seed 0 --split cv1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R0_repro --seed 1 --split cv1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R0_repro --seed 0 --split cv2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R0_repro --seed 1 --split cv2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R0_repro --seed 0 --split cv3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R0_repro --seed 1 --split cv3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R0_repro --seed 0 --split cv4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R0_repro --seed 1 --split cv4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag R1_rank --seed 0 --split cv0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 1 --split cv0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 0 --split cv1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 1 --split cv1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 0 --split cv2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 1 --split cv2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 0 --split cv3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 1 --split cv3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 0 --split cv4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 1 --split cv4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R2_rankhi --seed 0 --split cv0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R2_rankhi --seed 1 --split cv0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R2_rankhi --seed 0 --split cv1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R2_rankhi --seed 1 --split cv1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R2_rankhi --seed 0 --split cv2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R2_rankhi --seed 1 --split cv2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R2_rankhi --seed 0 --split cv3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R2_rankhi --seed 1 --split cv3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R2_rankhi --seed 0 --split cv4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R2_rankhi --seed 1 --split cv4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R7_mpnnft --seed 0 --split cv0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R7_mpnnft --seed 1 --split cv0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R7_mpnnft --seed 0 --split cv1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R7_mpnnft --seed 1 --split cv1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R7_mpnnft --seed 0 --split cv2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R7_mpnnft --seed 1 --split cv2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R7_mpnnft --seed 0 --split cv3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R7_mpnnft --seed 1 --split cv3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R7_mpnnft --seed 0 --split cv4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R7_mpnnft --seed 1 --split cv4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R1_rank_trainval --seed 0 --split cv0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --train_on trainval --fixed_epochs 6
+--tag R1_rank_trainval --seed 1 --split cv0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --train_on trainval --fixed_epochs 6
+--tag R1_rank_trainval --seed 0 --split cv1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --train_on trainval --fixed_epochs 6
+--tag R1_rank_trainval --seed 1 --split cv1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --train_on trainval --fixed_epochs 6
+--tag R1_rank_trainval --seed 0 --split cv2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --train_on trainval --fixed_epochs 6
+--tag R1_rank_trainval --seed 1 --split cv2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --train_on trainval --fixed_epochs 6
+--tag R1_rank_trainval --seed 0 --split cv3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --train_on trainval --fixed_epochs 6
+--tag R1_rank_trainval --seed 1 --split cv3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --train_on trainval --fixed_epochs 6
+--tag R1_rank_trainval --seed 0 --split cv4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --train_on trainval --fixed_epochs 6
+--tag R1_rank_trainval --seed 1 --split cv4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --train_on trainval --fixed_epochs 6
+--tag R1_rank --seed 3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 5 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 6 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R1_rank --seed 7 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R2_rankhi --seed 3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R7_mpnnft --seed 3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R2_rankhi --seed 4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 2.0
+--tag R7_mpnnft --seed 4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5 --mpnn_lr 1e-4
+--tag R9_650_rank --seed 0 --esm facebook/esm2_t33_650M_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R9_650_rank --seed 1 --esm facebook/esm2_t33_650M_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R9_650_rank --seed 2 --esm facebook/esm2_t33_650M_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5
+--tag R8_15B_rank --seed 0 --esm facebook/esm2_t48_15B_UR50D --esm_bf16 1 --lora_rank 8 --lora_lr 5e-5 --head_lr 2e-4 --wd 0.05 --rank_w 0.5
+--tag R8_15B_rank --seed 1 --esm facebook/esm2_t48_15B_UR50D --esm_bf16 1 --lora_rank 8 --lora_lr 5e-5 --head_lr 2e-4 --wd 0.05 --rank_w 0.5
+--tag R8_15B_rank --seed 2 --esm facebook/esm2_t48_15B_UR50D --esm_bf16 1 --lora_rank 8 --lora_lr 5e-5 --head_lr 2e-4 --wd 0.05 --rank_w 0.5

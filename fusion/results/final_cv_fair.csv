@@ -1,0 +1,6 @@
+comparison,n_proteins,ours_median,ref_median,delta_median,ci95,mean_delta,wins,wilcoxon_p,thermo_seeds,our_members
+cv0: ours vs ThermoMPNN retrained (same fold-train),51,0.8487,0.7808,0.0678,"[0.04, 0.084]",0.0532,44,1.041788429097798e-06,5,1
+cv1: ours vs ThermoMPNN retrained (same fold-train),59,0.8108,0.7727,0.0382,"[0.0217, 0.055]",0.0295,46,0.0004613277191674472,5,4
+cv2: ours vs ThermoMPNN retrained (same fold-train),63,0.8487,0.7777,0.071,"[0.0509, 0.0921]",0.0702,55,2.18399765953991e-09,5,3
+cv3: ours vs ThermoMPNN retrained (same fold-train),63,0.8602,0.8017,0.0585,"[0.0448, 0.0882]",0.0656,56,3.758275415567338e-09,5,2
+cv4: ours vs ThermoMPNN retrained (same fold-train),62,0.869,0.8011,0.0679,"[0.051, 0.0832]",0.0634,58,6.541293708694104e-11,5,3
