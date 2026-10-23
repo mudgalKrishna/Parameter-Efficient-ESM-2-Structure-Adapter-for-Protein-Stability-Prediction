@@ -1,0 +1,15 @@
+{
+ "members": [
+  "H4_3B_aug",
+  "K2_15B_lowlr",
+  "B_mpnnft",
+  "K_15B",
+  "D_mpnnonly",
+  "H4_3B_aug",
+  "K2_15B_lowlr",
+  "H4_3B_aug"
+ ],
+ "val_mean_spearman": 0.8658266318036076,
+ "val_median_spearman": 0.8835017914480738,
+ "single_best_config": "H3_3B_r32"
+}

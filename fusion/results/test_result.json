@@ -1,0 +1,47 @@
+{
+ "selection": {
+  "members": [
+   "H4_3B_aug",
+   "K2_15B_lowlr",
+   "B_mpnnft",
+   "K_15B",
+   "D_mpnnonly",
+   "H4_3B_aug",
+   "K2_15B_lowlr",
+   "H4_3B_aug"
+  ],
+  "val_mean_spearman": 0.8658266318036076,
+  "val_median_spearman": 0.8835017914480738,
+  "single_best_config": "H3_3B_r32"
+ },
+ "results": [
+  {
+   "comparison": "locked ensemble vs ThermoMPNN",
+   "n_proteins": 28,
+   "model_median": 0.8416,
+   "thermompnn_median": 0.772,
+   "delta_median": 0.0697,
+   "ci95": [
+    0.0375,
+    0.0952
+   ],
+   "mean_delta": 0.0525,
+   "wins": 24,
+   "wilcoxon_p": 1.1049211025238037e-05
+  },
+  {
+   "comparison": "single best config (seed-ens) vs ThermoMPNN",
+   "n_proteins": 28,
+   "model_median": 0.8263,
+   "thermompnn_median": 0.772,
+   "delta_median": 0.0543,
+   "ci95": [
+    0.0171,
+    0.0765
+   ],
+   "mean_delta": 0.0325,
+   "wins": 21,
+   "wilcoxon_p": 0.004778154194355011
+  }
+ ]
+}

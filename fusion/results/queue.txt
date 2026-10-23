@@ -1,0 +1,58 @@
+--tag A_base --seed 0
+--tag A_base --seed 1
+--tag A_base --seed 2
+--tag B_mpnnft --seed 0 --mpnn_lr 1e-4
+--tag B_mpnnft --seed 1 --mpnn_lr 1e-4
+--tag B_mpnnft --seed 2 --mpnn_lr 1e-4
+--tag C_nocorr --seed 0 --corr_w 0
+--tag C_nocorr --seed 1 --corr_w 0
+--tag C_nocorr --seed 2 --corr_w 0
+--tag D_mpnnonly --seed 0 --use_esm 0
+--tag D_mpnnonly --seed 1 --use_esm 0
+--tag D_mpnnonly --seed 2 --use_esm 0
+--tag E_esmonly --seed 0 --use_mpnn 0
+--tag E_esmonly --seed 1 --use_mpnn 0
+--tag E_esmonly --seed 2 --use_mpnn 0
+--tag F_nofuse --seed 0 --fuse_layers 0
+--tag F_nofuse --seed 1 --fuse_layers 0
+--tag F_nofuse --seed 2 --fuse_layers 0
+--tag G_r32 --seed 0 --lora_rank 32
+--tag G_r32 --seed 1 --lora_rank 32
+--tag G_r32 --seed 2 --lora_rank 32
+--tag H_3B --seed 0 --esm facebook/esm2_t36_3B_UR50D
+--tag H_3B --seed 1 --esm facebook/esm2_t36_3B_UR50D
+--tag H_3B --seed 2 --esm facebook/esm2_t36_3B_UR50D
+--tag H2_3B_lowlr --seed 0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 1e-4 --head_lr 3e-4
+--tag H2_3B_lowlr --seed 1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 1e-4 --head_lr 3e-4
+--tag H2_3B_lowlr --seed 2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 1e-4 --head_lr 3e-4
+--tag G_r32 --seed 3 --lora_rank 32
+--tag G_r32 --seed 4 --lora_rank 32
+--tag G_r32 --seed 5 --lora_rank 32
+--tag G_r32 --seed 6 --lora_rank 32
+--tag G_r32 --seed 7 --lora_rank 32
+--tag I_aug --seed 0 --lora_rank 32 --aug_eps 0.1
+--tag I_aug --seed 1 --lora_rank 32 --aug_eps 0.1
+--tag I_aug --seed 2 --lora_rank 32 --aug_eps 0.1
+--tag J_mpnn002 --seed 0 --lora_rank 32 --mpnn_ver v_48_002
+--tag J_mpnn002 --seed 1 --lora_rank 32 --mpnn_ver v_48_002
+--tag J_mpnn002 --seed 2 --lora_rank 32 --mpnn_ver v_48_002
+--tag J_mpnn030 --seed 0 --lora_rank 32 --mpnn_ver v_48_030
+--tag J_mpnn030 --seed 1 --lora_rank 32 --mpnn_ver v_48_030
+--tag J_mpnn030 --seed 2 --lora_rank 32 --mpnn_ver v_48_030
+--tag H3_3B_r32 --seed 0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag H3_3B_r32 --seed 1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag H3_3B_r32 --seed 2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag K_15B --seed 0 --esm facebook/esm2_t48_15B_UR50D --esm_bf16 1 --lora_rank 16 --lora_lr 1e-4 --head_lr 3e-4
+--tag K_15B --seed 1 --esm facebook/esm2_t48_15B_UR50D --esm_bf16 1 --lora_rank 16 --lora_lr 1e-4 --head_lr 3e-4
+--tag K_15B --seed 2 --esm facebook/esm2_t48_15B_UR50D --esm_bf16 1 --lora_rank 16 --lora_lr 1e-4 --head_lr 3e-4
+--tag H3_3B_r32 --seed 3 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag H3_3B_r32 --seed 4 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag H3_3B_r32 --seed 5 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag H3_3B_r32 --seed 6 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag H3_3B_r32 --seed 7 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4
+--tag K2_15B_lowlr --seed 0 --esm facebook/esm2_t48_15B_UR50D --esm_bf16 1 --lora_rank 8 --lora_lr 5e-5 --head_lr 2e-4 --wd 0.05
+--tag K2_15B_lowlr --seed 1 --esm facebook/esm2_t48_15B_UR50D --esm_bf16 1 --lora_rank 8 --lora_lr 5e-5 --head_lr 2e-4 --wd 0.05
+--tag K2_15B_lowlr --seed 2 --esm facebook/esm2_t48_15B_UR50D --esm_bf16 1 --lora_rank 8 --lora_lr 5e-5 --head_lr 2e-4 --wd 0.05
+--tag H4_3B_aug --seed 0 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --aug_eps 0.1
+--tag H4_3B_aug --seed 1 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --aug_eps 0.1
+--tag H4_3B_aug --seed 2 --esm facebook/esm2_t36_3B_UR50D --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --aug_eps 0.1
