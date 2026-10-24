@@ -1,0 +1,88 @@
+{
+ "baseline": "S0_base",
+ "comparisons": {
+  "S1_fp": {
+   "arm": "S1_fp",
+   "n_pairs": 6,
+   "val_delta_mean": -0.0082,
+   "val_wins": 1,
+   "test_delta_mean": -0.0111,
+   "test_wins": 0,
+   "base_val": 0.8298,
+   "arm_val": 0.8215,
+   "base_test": 0.8214,
+   "arm_test": 0.8103,
+   "val_wilcoxon_p": 0.0625,
+   "test_wilcoxon_p": 0.03125
+  },
+  "S2_fp03": {
+   "arm": "S2_fp03",
+   "n_pairs": 6,
+   "val_delta_mean": -0.0061,
+   "val_wins": 1,
+   "test_delta_mean": -0.0138,
+   "test_wins": 0,
+   "base_val": 0.8298,
+   "arm_val": 0.8237,
+   "base_test": 0.8214,
+   "arm_test": 0.8076,
+   "val_wilcoxon_p": 0.0625,
+   "test_wilcoxon_p": 0.03125
+  },
+  "S3_reg": {
+   "arm": "S3_reg",
+   "n_pairs": 6,
+   "val_delta_mean": -0.002,
+   "val_wins": 3,
+   "test_delta_mean": -0.0068,
+   "test_wins": 1,
+   "base_val": 0.8298,
+   "arm_val": 0.8278,
+   "base_test": 0.8214,
+   "arm_test": 0.8145,
+   "val_wilcoxon_p": 0.4375,
+   "test_wilcoxon_p": 0.09375
+  },
+  "S4_sr": {
+   "arm": "S4_sr",
+   "n_pairs": 6,
+   "val_delta_mean": 0.0003,
+   "val_wins": 4,
+   "test_delta_mean": -0.0033,
+   "test_wins": 1,
+   "base_val": 0.8298,
+   "arm_val": 0.8301,
+   "base_test": 0.8214,
+   "arm_test": 0.8181,
+   "val_wilcoxon_p": 0.5625,
+   "test_wilcoxon_p": 0.21875
+  }
+ },
+ "arm_means": {
+  "S0_base": {
+   "val": 0.8298,
+   "test": 0.8214,
+   "n": 6
+  },
+  "S1_fp": {
+   "val": 0.8215,
+   "test": 0.8103,
+   "n": 6
+  },
+  "S2_fp03": {
+   "val": 0.8237,
+   "test": 0.8076,
+   "n": 6
+  },
+  "S3_reg": {
+   "val": 0.8278,
+   "test": 0.8145,
+   "n": 6
+  },
+  "S4_sr": {
+   "val": 0.8301,
+   "test": 0.8181,
+   "n": 6
+  }
+ }
+}

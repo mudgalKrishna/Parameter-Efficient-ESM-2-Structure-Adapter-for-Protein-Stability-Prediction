@@ -158,7 +158,67 @@ Reported because the pre-registration committed to reporting them.
   fold-to-fold spread. Reporting "we used a clever ensemble" would overstate its contribution.
 - **Cross-attention fusion and an auxiliary burial task both hurt** (see ablations) and were dropped.
 
-## 8. Disclosure
+## 8. Round 3: a pre-registered attempt to improve on this, which failed
+
+Round 2's training logs point at a specific constraint. Across all 91 runs, validation peaked at a
+**mean epoch of 8.4 (max 22) against a 40-epoch cap** — every run early-stopped and then overfit.
+Together with two other round-2 results (15B scored *below* 3B; train+val retraining gave
+Δ −0.0007 despite +13% more variants), the diagnosis is that the model is **protein-limited, not
+capacity- or compute-limited**: 215,731 training variants but only 239 training *proteins*, and
+variants within a protein are strongly correlated, so the effective sample size is the protein count.
+
+Two ideas were therefore **dropped before testing**, and the reasons are recorded rather than the
+ideas quietly forgotten:
+
+- *Train longer* — directly refuted by the best-epoch distribution above.
+- *Reverse-mutation augmentation to enforce antisymmetry* — a no-op for this architecture. ΔΔG is
+  read off one wild-type forward pass as `head[mut] − head[wt]`, so ΔΔG(wt→mut) = −ΔΔG(mut→wt)
+  holds identically by construction.
+
+Three ideas were tested, under `PREREGISTRATION_R3.md` (written before any round-3 result was read).
+**All three failed.** Paired on (fold, seed), 650M, 3 folds × 2 seeds per arm:
+
+| Arm | Δ val | val wins | Δ fold test | test wins | p (test) |
+|---|---|---|---|---|---|
+| **+ FireProtDB, 88 proteins** (full weight) | −0.0082 | 1/6 | −0.0111 | **0/6** | 0.031 |
+| + FireProtDB, down-weighted to 0.3 | −0.0061 | 1/6 | −0.0138 | **0/6** | 0.031 |
+| + LoRA & head dropout | −0.0020 | 3/6 | −0.0068 | 1/6 | 0.094 |
+| + soft-rank Spearman surrogate | +0.0003 | 4/6 | −0.0033 | 1/6 | 0.22 |
+
+The pre-registered success criterion was a rise in **mean fold validation**. Only the soft-rank arm
+rose at all, by +0.0003 (p = 0.56) — noise — and it lost on fold test. Per the pre-registration the
+3B stage was skipped and this is published as a negative result. **The round-2 numbers stand
+unchanged, and the official test split was not scored a third time.**
+
+### Why the FireProt result is informative rather than a bug
+
+This was the arm with real expected upside: it raises training proteins from 239 to 327 (+37%) on
+precisely the axis the diagnosis identifies. It made the model *worse*, in every fold and every seed.
+Three checks say that is a property of the data, not of the plumbing:
+
+- **Labels are correctly converted.** FireProt uses the opposite sign convention (positive =
+  destabilizing; median +0.68, and corr(ddG, ASA) = −0.34 confirms buried positions score high)
+  and a wider spread (std 1.88 vs 1.00). After negating and rescaling, the converted labels match
+  Tsuboyama to three decimals: median −0.473 vs −0.497, std 1.004 vs 1.002, fraction destabilizing
+  0.77 vs 0.77. Feeding it raw would have been the obvious bug; it was checked for and fixed first.
+- **No leakage.** Only FireProt's `homologue-free` split is used, so no added protein is homologous
+  to *any* megascale protein, per ThermoMPNN's own mmseqs map. A plain k-mer screen catches 7 of the
+  11 contaminated proteins; their map catches all 11, including remote homologues at 29–59% identity
+  that share no 8-mers. 88 of 89 proteins converted (2,577 of 2,578 variants).
+- **It is not a loss-weighting artifact.** FireProt proteins carry a median of ~9 variants against
+  Tsuboyama's ~900, so each contributes an equally-weighted but much noisier per-protein correlation
+  term. Down-weighting them to 0.3 did not help — it was slightly worse (0/6 on test either way).
+
+The conclusion is that **cross-assay stability data does not transfer here**: FireProt aggregates
+many labs, methods and conditions, and the label noise it brings outweighs the structural diversity
+its extra proteins add. The protein-limited diagnosis appears to be right about the *constraint* and
+wrong about the *remedy* — more proteins help only if they come from a comparably uniform assay.
+
+Practically, 0.848 looks close to the ceiling for this approach: Tsuboyama's own experimental
+replicate reproducibility bounds per-protein ρ near 0.88–0.90, and none of the obvious levers moved
+the result. Reported in full because a pre-registration that only publishes successes is worthless.
+
+## 9. Disclosure
 
 The official test split was scored **twice in total**, once per project phase. The earlier phase used
 a validation-selected ensemble (test ρ = 0.842); this phase locked its ensemble using the CV-chosen
@@ -168,7 +228,7 @@ numbers are reported; neither was selected by looking at test.
 The phase reported above is the one to cite, because its margin is backed by 5 independent folds
 against a fairly-trained baseline rather than a single split.
 
-## 9. Earlier phase of this project
+## 10. Earlier phase of this project
 
 The project's first phase used a re-implemented structure encoder and reached test ρ = **0.7547**,
 against ThermoMPNN's 0.7720 — a paired difference of −0.0173 (95% CI −0.068 to +0.038, p = 0.465),
@@ -193,12 +253,13 @@ In the earlier phase the structure branch added only +0.0044 over a sequence-onl
 including zero. With the checkpoint correctly loaded, the structure stream contributes a clear
 +0.009 on validation (0.848 → 0.857) and the fused model beats either stream alone.
 
-## 10. Repository layout
+## 11. Repository layout
 
 ```
 fusion/
-  README.md                   detailed write-up of this phase
-  PREREGISTRATION.md          written before any model in this phase was trained
+  README.md                   detailed write-up of the headline phase
+  PREREGISTRATION.md          written before any model in the headline phase was trained
+  PREREGISTRATION_R3.md       written before any round-3 result was read
   code/
     stab2.py                  the fusion model (ESM-2 LoRA + ProteinMPNN + transformer)
     thermo_train.py           retrains ThermoMPNN's TransferModel = the fair baseline
@@ -206,12 +267,17 @@ fusion/
     gen_thermo_all.py         released-weight predictions, all 271k variants
     launch2.py run_thermo.sh  job queues
     figure.py                 the figure at the top of this file
+    stab3.py                  round 3: FireProt, regularisation, soft-rank loss
+    fireprot_build.py         converts FireProtDB to the training tensor format
+    ab.py runq.py             round-3 paired A/B analysis and job runner
   results/
     final_results.json        headline numbers
     final_cv_fair.csv         per-fold fair comparison
-    round2_runs.csv           91 training runs, this phase
+    round2_runs.csv           91 training runs, headline phase
     thermompnn_retrained_runs.csv   30 baseline runs
     runs2/ runs_thermo/       per-run JSON records
+    round3_runs.csv           30 round-3 runs (the negative result)
+    round3_ab.json            round-3 paired comparisons
     results.png               the figure
 
 train_esm2_spurs_fixed.py     earlier-phase pipeline (marimo notebook)
@@ -219,7 +285,7 @@ run_structure_track.py        earlier-phase runner
 analyze_650_local.py          earlier-phase analysis
 ```
 
-## 11. Reproduce
+## 12. Reproduce
 
 ```bash
 git clone https://github.com/dauparas/ProteinMPNN    ext/ProteinMPNN
@@ -236,11 +302,19 @@ python fusion/code/ens3.py --lock      # lock the ensemble before touching test
 python fusion/code/final.py            # fair comparison + the single locked test evaluation
 ```
 
-Runtimes on one RTX PRO 6000 (96 GB): 650M ≈ 2 min, 3B ≈ 3 min, 15B ≈ 6 min, and the ThermoMPNN
-baseline ≈ 10 s once its frozen features are cached. The full study is **179 training runs**: 58
-(earlier phase) + 91 (this phase) + 30 (retrained ThermoMPNN baseline).
+Round 3 (the negative result) adds:
 
-## 12. Limitations
+```bash
+python fusion/code/fireprot_build.py                   # FireProtDB -> training tensors
+python fusion/code/runq.py queue_screen.txt 2           # the paired A/B arms
+python fusion/code/ab.py S0_base S1_fp S2_fp03 S3_reg S4_sr
+```
+
+Runtimes on one RTX PRO 6000 (96 GB): 650M ≈ 2 min, 3B ≈ 3 min, 15B ≈ 6 min, and the ThermoMPNN
+baseline ≈ 10 s once its frozen features are cached. The full study is **209 training runs**: 58
+(earlier phase) + 91 (headline phase) + 30 (retrained ThermoMPNN baseline) + 30 (round 3).
+
+## 13. Limitations
 
 - The official test split has only **28 proteins**; the 5-fold result across 298 proteins is the more
   reliable evidence, and the two agree (+0.066 and +0.061).
@@ -250,6 +324,10 @@ baseline ≈ 10 s once its frozen features are cached. The full study is **179 t
 - Both models here consume experimental or predicted backbone structures; errors in those inputs
   propagate.
 - Predictions are for research prioritisation and are not a substitute for experimental measurement.
+- This approach looks close to its ceiling. Round 3 tested four further ideas under
+  pre-registration and none improved on 0.848 (section 8), and Tsuboyama's own replicate
+  reproducibility bounds per-protein ρ near 0.88–0.90, so the remaining gap to 1.0 is largely
+  experimental noise rather than model error.
 
 ## Summary
 
