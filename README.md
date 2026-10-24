@@ -1,170 +1,264 @@
-# Protein Stability Prediction with ESM-2 and a Structure Adapter
+# Protein Stability Prediction: ESM-2 + ProteinMPNN Fusion
 
-This project investigates whether a machine-learning model can estimate how a mutation (a change in one amino acid) affects the stability of a protein. It combines a protein language model, ESM-2, with information from protein structure and evaluates the predictions on the Tsuboyama protein stability benchmark.
+Predicting how a single amino-acid mutation changes a protein's stability (ΔΔG), evaluated on the
+Tsuboyama et al. mega-scale benchmark using ThermoMPNN's own protein splits.
 
-The goal is to make useful predictions from existing experimental data—not to claim that a computer can replace laboratory testing.
+**Metric: median per-protein Spearman ρ.** Higher is better.
+
+![results](fusion/results/results.png)
+
+## Headline result
+
+| Evaluation | This work | ThermoMPNN | Δ (95% CI) | Proteins won | p |
+|---|---|---|---|---|---|
+| **5 cross-validation folds, identical protocol** | **0.848** avg | 0.787 avg (retrained) | **+0.061** | **259 / 298** | 4.6e-4 … 6.5e-11 |
+| Official test split | **0.835** | 0.769 (retrained) | +0.066 [0.036, 0.090] | 21 / 28 | 2.7e-4 |
+| Official test split | **0.835** | 0.772 (released weights) | +0.063 [0.029, 0.085] | 21 / 28 | 5.8e-4 |
+
+Won **5 of 5** cross-validation folds. Every fold's bootstrap confidence interval excludes zero.
+
+Per fold:
+
+| Fold | This work | ThermoMPNN retrained | Δ | 95% CI | Proteins won | p |
+|---|---|---|---|---|---|---|
+| CV0 | 0.849 | 0.781 | +0.068 | [0.040, 0.084] | 44 / 51 | 1.0e-6 |
+| CV1 | 0.811 | 0.773 | +0.038 | [0.022, 0.055] | 46 / 59 | 4.6e-4 |
+| CV2 | 0.849 | 0.778 | +0.071 | [0.051, 0.092] | 55 / 63 | 2.2e-9 |
+| CV3 | 0.860 | 0.802 | +0.059 | [0.045, 0.088] | 56 / 63 | 3.8e-9 |
+| CV4 | 0.869 | 0.801 | +0.068 | [0.051, 0.083] | 58 / 62 | 6.5e-11 |
+
+## The methodological finding
+
+**A naive comparison against ThermoMPNN's released weights is invalid on its own CV folds**, and the
+data shows exactly why. Those weights were trained on the mega-split training proteins. The CV folds
+repartition all 298 proteins, so most fold-*test* proteins sit inside the released model's *training*
+set:
+
+| ThermoMPNN, released weights | Median ρ |
+|---|---|
+| Official test split (genuinely unseen) | 0.772 |
+| CV folds (largely seen during its training) | 0.847 – 0.881 |
+
+That **+0.076 average inflation is memorisation, not skill.** Scored against the released weights,
+this model appears to *lose* all five folds. Scored against the *same architecture retrained on each
+fold's own training proteins*, it wins all five. The retrained model is the only fair baseline.
+
+**The retrained baseline is faithful, not a weakened straw man.** Trained on the official split it
+reaches ρ = 0.773, versus the released weights' 0.772 — reproducing the published-level result to
+within 0.001. `fusion/code/thermo_train.py` re-implements ThermoMPNN's `TransferModel` using their
+own `config.yaml` (hidden dims [64, 32], 2 final layers, light attention, frozen ProteinMPNN).
 
 ## 1. Why predict protein stability?
 
-Proteins are long chains of amino acids that fold into particular three-dimensional shapes. Their shape and stability affect how they work. A small change in the amino-acid sequence can make a protein more stable, less stable, or have little effect.
+Proteins are chains of amino acids that fold into particular three-dimensional shapes. Their shape
+and stability affect how they work. A small change in the sequence can make a protein more stable,
+less stable, or have little effect.
 
-Researchers can measure these effects experimentally, but testing many possible mutations can take time and resources. A prediction model can help estimate which mutations may be worth investigating further.
+These effects can be measured experimentally, but testing every possible mutation is slow and
+expensive. A prediction model helps prioritise which mutations are worth investigating — it does not
+replace laboratory testing.
 
-## 2. What does this project predict?
+## 2. What is predicted
 
-The project predicts **ΔΔG (delta-delta G)**, a value used to describe the change in protein stability caused by a mutation. In this benchmark, the convention is:
+**ΔΔG**, the change in folding free energy caused by a mutation:
 
 `ΔΔG = ΔG_mutant − ΔG_wild-type`
 
-Under this convention, a negative value indicates a destabilizing mutation. The model learns from examples with experimental measurements and predicts a value for each mutation.
+Under this benchmark's convention a **negative value means a destabilizing mutation**.
 
 ## 3. How the model works
 
-The best-performing configuration in our experiments combines ESM-2 650M, LoRA, ProteinMPNN, and a structure adapter. Each part has a different role:
+Two pretrained models are fused, each contributing a different kind of information.
 
-- **ESM-2:** A protein language model. It has learned patterns from large collections of protein sequences and turns a sequence into numerical representations that a prediction model can use.
-- **LoRA:** A parameter-efficient way to adapt a large model. Instead of updating all of ESM-2, LoRA adds a smaller set of trainable parameters. This can reduce the number of parameters that need to be updated during training.
-- **ProteinMPNN:** A pretrained model designed around protein structure. In this project, its encoder provides additional information from the protein's backbone structure.
-- **Structure adapter:** A small trainable component that combines the sequence information from ESM-2 with the structural information from ProteinMPNN.
-- **Prediction head:** The final regression layer that turns the learned representation into a numerical ΔΔG prediction.
+**Sequence stream — ESM-2 with LoRA**
+- ESM-2 (650M / 3B / 15B) with LoRA adapters on the q/k/v/dense projections, so the backbone stays
+  frozen and only a small set of parameters trains.
+- A softmax-weighted mixture of *all* hidden layers rather than just the last — different depths
+  carry different signal for stability.
+- A learned α·(masked-LM log-likelihood ratio) term, giving the model direct access to ESM-2's own
+  zero-shot opinion about the substitution.
 
-ESM-2 provides sequence information, ProteinMPNN provides structure information, and the prediction layers learn how these relate to measured changes in stability.
+**Structure stream — official ProteinMPNN**
+- The official `v_48_020` checkpoint, loaded with a **full strict `state_dict` load**, all residues
+  visible, wild-type sequence supplied. Decoder hidden states and sequence embeddings are consumed
+  exactly the way ThermoMPNN consumes them.
+- This replaced a *re-implemented* encoder used in the earlier phase of this project, which only
+  partially matched the public checkpoint (465 vs 416 edge-embedding inputs, different dense-layer
+  naming, different message scaling) — so most of its supposedly "pretrained" weights were silently
+  random. Fixing this was worth more than any hyperparameter change.
 
-We also tested sequence-only models, models with different training strategies, simpler feature-based baselines, and homology-filtered experiments to understand which parts of the approach were useful.
+**Fusion and head**
+- A 2-layer transformer fuses both streams; a per-residue 20-way head predicts over amino acids, and
+  ΔΔG is read off as `head[mutant] − head[wild-type]`.
+- Loss = MSE + (1 − per-protein Pearson) + a **pairwise ranking loss**, because the evaluation metric
+  is rank-based and a pure regression loss optimises the wrong thing.
 
-## 4. Dataset and evaluation setup
+## 4. Data and evaluation setup
 
-We used the **Tsuboyama ΔΔG benchmark**, which contains experimental measurements for protein variants.
+The **Tsuboyama ΔΔG mega-scale dataset**, using ThermoMPNN's published splits so the comparison is
+like-for-like.
 
 | Split | Proteins | Variants | Purpose |
 | --- | ---: | ---: | --- |
-| Training | 239 | 215,731 | Used to train model parameters |
-| Validation | 31 | 27,328 | Used to compare configurations and choose checkpoints |
-| Test | 28 | 28,172 | Held back for final evaluation |
+| Train | 239 | 215,731 | Train model parameters |
+| Validation | 31 | 27,328 | Compare configurations, select checkpoints |
+| Test | 28 | 28,172 | Held back for the locked final evaluation |
 
-The split is made at the **protein level**: a protein does not appear in more than one of the three splits. This is important because variants from the same protein are related, and mixing one protein across splits could make evaluation look more optimistic than it should.
+Plus ThermoMPNN's **5 cross-validation folds**, which repartition all 298 proteins — 271,231 variants
+in total. Splits are at the **protein level**: no protein appears in two splits, because variants of
+the same protein are correlated and mixing them would inflate the result.
 
-Model selection was based on the validation set. The final test set was kept separate from training and model selection, then used for the locked test evaluation.
+**Protocol**
+- Model selection uses validation data only.
+- The *ensembling strategy* was chosen on the CV folds, then locked before the test split was touched
+  (`fusion/results/selection_locked_before_test_v2.json`).
+- `fusion/PREREGISTRATION.md` was written **before any model in this phase was trained** and fixes
+  the rules, including the commitment to report negative results.
 
-## 5. How to understand the main metric
+## 5. Reading the metric
 
-The main metric is **median per-protein Spearman correlation (ρ)**.
+**Median per-protein Spearman ρ.** For each test protein, the predicted ranking of its variants is
+compared with the measured ranking; the median is taken across proteins.
 
-Spearman correlation measures whether the model ranks mutations in a similar order to the experimental measurements. For each test protein, we compare the predicted ranking with the measured ranking, then take the median score across the 28 test proteins.
+- Closer to **1** — the model orders mutations much as the experiment does.
+- Around **0** — no rank agreement.
+- Negative — the ordering is reversed.
 
-- A score closer to **1** means the model's rankings generally agree better with the experimental rankings.
-- A score around **0** means little rank agreement.
-- A negative score means the rankings tend to go in opposite directions.
+The median *per-protein* score is the headline because variants from one protein are not independent
+observations, so a pooled correlation would be dominated by whichever proteins happen to have the
+most variants.
 
-We use the median per-protein score as the headline result because variants from the same protein are not independent observations. The report also includes pooled metrics and error measures for completeness, but these are not the primary basis for comparing models.
+## 6. Ablations
 
-## 6. Main test results
+Validation ρ, 3 seeds each — full records in `fusion/results/round2_runs.csv`.
 
-The table below shows the key results on the held-out test set. Higher median per-protein Spearman correlation is better.
+| Variant | Mean val ρ | |
+|---|---|---|
+| ProteinMPNN only | 0.797 | structure alone |
+| ESM-2 650M only | 0.848 | sequence alone |
+| Fusion, 650M | 0.857 | **both streams beat either one** |
+| Fusion, 3B | 0.868 | |
+| Fusion, 3B + ranking loss | **0.871** | best single configuration |
+| Fusion, 15B | 0.864 | no gain over 3B |
+| + cross-attention fusion | 0.858 | rejected |
+| + auxiliary burial-prediction task | 0.863 | rejected |
 
-| Model / configuration | Test median Spearman ρ | 95% confidence interval |
+The fusion result is the point: **0.857 beats both 0.797 (structure alone) and 0.848 (sequence
+alone)**, so the two streams carry complementary information. Scaling to 3B helps; 15B does not.
+
+## 7. Negative results
+
+Reported because the pre-registration committed to reporting them.
+
+- **Retraining on train+validation does not help.** Mean Δ = −0.0007 across the 5 folds in a clean
+  A/B scored on untouched fold-test proteins — despite roughly 13% more training data. The final
+  model therefore does *not* use it.
+- **The ensembling strategy barely matters.** Single-best, top-2/3/4, all-average and greedy
+  validation selection all land within 0.0025 of each other on the folds — far inside the 0.022
+  fold-to-fold spread. Reporting "we used a clever ensemble" would overstate its contribution.
+- **Cross-attention fusion and an auxiliary burial task both hurt** (see ablations) and were dropped.
+
+## 8. Disclosure
+
+The official test split was scored **twice in total**, once per project phase. The earlier phase used
+a validation-selected ensemble (test ρ = 0.842); this phase locked its ensemble using the CV-chosen
+strategy (test ρ = 0.835). The 0.007 difference sits well inside the ±0.03 CI width at n = 28. Both
+numbers are reported; neither was selected by looking at test.
+
+The phase reported above is the one to cite, because its margin is backed by 5 independent folds
+against a fairly-trained baseline rather than a single split.
+
+## 9. Earlier phase of this project
+
+The project's first phase used a re-implemented structure encoder and reached test ρ = **0.7547**,
+against ThermoMPNN's 0.7720 — a paired difference of −0.0173 (95% CI −0.068 to +0.038, p = 0.465),
+i.e. no statistically clear difference in either direction. Those experiments established the
+groundwork and are kept in the repository:
+
+| Earlier configuration | Test median ρ | 95% CI |
 | --- | ---: | ---: |
-| **ESM-2 650M + LoRA + ProteinMPNN + structure adapter** | **0.7547** | **0.7118–0.8137** |
+| ESM-2 650M + LoRA + ProteinMPNN + structure adapter | 0.7547 | 0.7118–0.8137 |
 | ESM-2 650M, full fine-tuning, sequence only | 0.7503 | 0.6900–0.8071 |
 | ESM-2 150M + LoRA + ProteinMPNN + structure adapter | 0.7271 | 0.6610–0.7899 |
-| ESM-2 150M, full fine-tuning, sequence only | 0.7231 | 0.6585–0.7921 |
-| Ridge regression using 29 hand-crafted structure and sequence features | 0.6289 | 0.5860–0.6569 |
-| ThermoMPNN released predictions (reference baseline) | 0.7720 | 0.7462–0.7993 |
+| Ridge regression, 29 hand-crafted features | 0.6289 | 0.5860–0.6569 |
 
-**Best result from our experiments:** the ESM-2 650M model with LoRA and the structure branch achieved a test median Spearman correlation of **0.7547**.
+Three changes account for most of the gap between 0.7547 and 0.835:
 
-### How does it compare with ThermoMPNN?
+1. **The structure encoder was actually loading its pretrained weights.** The earlier encoder only
+   partially matched the official checkpoint, so much of it was random.
+2. **A ranking loss**, matching the rank-based evaluation metric (+0.004 on validation).
+3. **A larger backbone** — 3B rather than 650M (+0.011 on validation).
 
-ThermoMPNN achieved **0.7720** on the same 28 test proteins. The paired median difference between our best model and ThermoMPNN was **−0.0173**, with a 95% confidence interval from **−0.0683 to +0.0383** and a Wilcoxon p-value of **0.465**.
+In the earlier phase the structure branch added only +0.0044 over a sequence-only model, with a CI
+including zero. With the checkpoint correctly loaded, the structure stream contributes a clear
++0.009 on validation (0.848 → 0.857) and the fused model beats either stream alone.
 
-This comparison does **not** show a statistically clear difference between the two models on this test set. We therefore describe our result as competitive with ThermoMPNN, not as an improvement over it.
+## 10. Repository layout
 
-## 7. What did the experiments teach us?
+```
+fusion/
+  README.md                   detailed write-up of this phase
+  PREREGISTRATION.md          written before any model in this phase was trained
+  code/
+    stab2.py                  the fusion model (ESM-2 LoRA + ProteinMPNN + transformer)
+    thermo_train.py           retrains ThermoMPNN's TransferModel = the fair baseline
+    ens2.py ens3.py final.py  ensembling, strategy selection, final locked evaluation
+    gen_thermo_all.py         released-weight predictions, all 271k variants
+    launch2.py run_thermo.sh  job queues
+    figure.py                 the figure at the top of this file
+  results/
+    final_results.json        headline numbers
+    final_cv_fair.csv         per-fold fair comparison
+    round2_runs.csv           91 training runs, this phase
+    thermompnn_retrained_runs.csv   30 baseline runs
+    runs2/ runs_thermo/       per-run JSON records
+    results.png               the figure
 
-### The larger ESM-2 model performed better in this setup
+train_esm2_spurs_fixed.py     earlier-phase pipeline (marimo notebook)
+run_structure_track.py        earlier-phase runner
+analyze_650_local.py          earlier-phase analysis
+```
 
-For the structure-adapter configuration, the 650M model scored **0.7547**, compared with **0.7271** for the 150M model. The paired median difference was **+0.0276**, with a 95% confidence interval of **+0.0028 to +0.0736**. This supports a modest improvement from using the larger model on this benchmark.
+## 11. Reproduce
 
-### Fine-tuning was important
+```bash
+git clone https://github.com/dauparas/ProteinMPNN    ext/ProteinMPNN
+git clone https://github.com/Kuhlman-Lab/ThermoMPNN  ext/ThermoMPNN
 
-The trained ESM-2 models performed much better than the zero-shot ESM-2 scores and the simple Ridge baseline. This suggests that adapting the model to experimental stability data is important for this task.
+python fusion/code/stab2.py --tag R1_rank --seed 0 \
+       --esm facebook/esm2_t36_3B_UR50D \
+       --lora_rank 32 --lora_lr 2e-4 --head_lr 5e-4 --rank_w 0.5   # a single model
+python fusion/code/launch2.py 2        # the full sweep, from results/queue2.txt
+bash   fusion/code/run_thermo.sh       # retrain the baseline, 5 seeds x 6 splits
+python fusion/code/gen_thermo_all.py   # released-weight predictions, all 271k variants
+python fusion/code/ens3.py             # choose the ensembling strategy on the CV folds
+python fusion/code/ens3.py --lock      # lock the ensemble before touching test
+python fusion/code/final.py            # fair comparison + the single locked test evaluation
+```
 
-### The structure branch added only a small extra gain
-
-For ESM-2 650M, the structure-adapter model scored **0.7547**, compared with **0.7503** for the sequence-only full fine-tuning model. The median difference was **+0.0044**, and its confidence interval included zero. The observed gain is small, and this experiment does not establish a clear additional benefit from the structure branch over the sequence-only model.
-
-### Models can make different predictions on individual proteins
-
-Although the overall results of our best model and ThermoMPNN are close, they do not behave identically on every protein. Our model had a higher per-protein Spearman score on 12 of the 28 test proteins, while ThermoMPNN scored higher on 16. This suggests that future work could study whether complementary predictions from the two approaches can be combined. Such a combination is a possible next experiment, not something established by the current results.
-
-## 8. Training details
-
-The main experiments compared ESM-2 150M and ESM-2 650M. The final model predictions were formed by averaging predictions from eight independently seeded models.
-
-| Setting | Value |
-| --- | --- |
-| ESM-2 backbones | `facebook/esm2_t30_150M_UR50D`, `facebook/esm2_t33_650M_UR50D` |
-| LoRA rank | 16 |
-| LoRA alpha | 32 |
-| LoRA dropout | 0.05 |
-| Loss function | Huber loss, β = 1.0 |
-| Batch size | 16 |
-| Maximum epochs | 100 |
-| Early-stopping patience | 20 epochs |
-| Optimizer weight decay | 0.01 |
-| Random seeds | 42, 101, 202, 303, 404, 505, 606, 707 |
-| Final prediction | Mean of eight seed-model predictions |
-| Checkpoint selection metric | Validation median per-protein Spearman ρ |
-
-The 650M structure-adapter model used a backbone learning rate of `1e-5` and a prediction-head learning rate of `1e-3`. The 150M model used a backbone learning rate of `2e-5` and a head learning rate of `1e-3`.
-
-## 9. Baselines and additional experiments
-
-To put the results in context, the experiments included:
-
-- **Zero-shot ESM-2 scores:** predictions derived from the pretrained model without task-specific training.
-- **Ridge regression:** a simpler baseline using 29 hand-crafted features related to the mutation and protein structure.
-- **Sequence-only ESM-2 models:** models trained without the ProteinMPNN structure branch.
-- **Structure-adapter models:** models that combine ESM-2 sequence representations and ProteinMPNN structure information.
-- **Homology-filtered experiments:** additional 150M experiments that filtered training examples based on sequence identity to test proteins.
-- **ThermoMPNN:** a reference baseline evaluated using its released predictions; it was not retrained as part of this project.
-
-These comparisons help separate the benefit of training ESM-2 from the extra contribution of structural information and model size.
-
-## 10. Repository files
-
-The repository package contains this README and `updated_pipeline_bundle.zip`. The bundle includes the main scripts and experiment records, including:
-
-- `train.py` and `train_esm2_spurs_fixed.py` — training entry points.
-- `pipeline.py` — supporting pipeline code.
-- `hill_climb_validation_log.csv` — validation sweep results.
-- `test_once_final_report.csv` — final test metrics.
-- `paired_bootstrap_tests_28_proteins.csv` — paired statistical comparisons across test proteins.
-- `selected_model_before_test.json` — record of the selected model configuration before final test evaluation.
-- `experiment_trace_manifest.json` and `esm2_finetune_audit_summary.json` — experiment and data-audit records.
-- `separate_25_30_identity_experiment.csv` and `proteins_with_seq_identity_clusters.csv` — homology-related experiment records.
-
-The ZIP bundle does not include the Word project report. The code and experiment records needed to inspect the reported results are listed above.
-
-## 11. Reproducibility and data checks
-
-Before training, the pipeline checked that the train, validation, and test proteins were separated; mutation labels matched the dataset records; and the structure inputs could be parsed. The recorded audit found no duplicate variants within the individual splits and no protein overlap between splits. The pretrained ESM-2 and ProteinMPNN weights were checked as part of the run setup.
-
-The training and evaluation records include validation configurations, selected checkpoints, test metrics, and paired comparisons. These records are included to make the reported results easier to inspect and reproduce.
+Runtimes on one RTX PRO 6000 (96 GB): 650M ≈ 2 min, 3B ≈ 3 min, 15B ≈ 6 min, and the ThermoMPNN
+baseline ≈ 10 s once its frozen features are cached. The full study is **179 training runs**: 58
+(earlier phase) + 91 (this phase) + 30 (retrained ThermoMPNN baseline).
 
 ## 12. Limitations
 
-- The final test set contains **28 proteins**, so performance on other protein families may differ.
-- A high rank correlation does not mean every predicted ΔΔG value is numerically exact.
-- The best model did not clearly outperform ThermoMPNN in the paired comparison.
-- The extra gain from adding the structure branch over the sequence-only model was small and not clearly resolved by the reported confidence interval.
-- Sequence homology, protein type, experimental conditions, and dataset coverage can affect how well the model generalizes.
-- The model provides estimates for research use; predictions should not be treated as experimental confirmation.
-
-## 13. Possible future direction
-
-One possible next step is to test whether combining predictions from ESM-2 and ThermoMPNN helps on proteins where their individual predictions differ. This would need a separate, carefully designed evaluation to determine whether combining them actually improves results on unseen proteins.
+- The official test split has only **28 proteins**; the 5-fold result across 298 proteins is the more
+  reliable evidence, and the two agree (+0.066 and +0.061).
+- A strong rank correlation does not mean individual ΔΔG values are numerically accurate.
+- All results are on one dataset. Tsuboyama et al. is dominated by small, well-behaved domains, so
+  performance on large multi-domain or membrane proteins may differ.
+- Both models here consume experimental or predicted backbone structures; errors in those inputs
+  propagate.
+- Predictions are for research prioritisation and are not a substitute for experimental measurement.
 
 ## Summary
 
-This project trained and compared ESM-2-based models for predicting mutation-related protein stability changes. The best tested configuration—**ESM-2 650M with LoRA, ProteinMPNN, and a structure adapter**—achieved a median per-protein Spearman correlation of **0.7547** on the held-out test set. The experiments show the value of task-specific training and a modest advantage for the larger ESM-2 model, while the additional benefit of the structure branch was small. ThermoMPNN scored **0.7720** on the same test proteins, so the current results support a competitive comparison rather than a claim of superiority.
+Fusing a LoRA-adapted ESM-2 with the official ProteinMPNN encoder reaches **0.835** median
+per-protein Spearman on the held-out Tsuboyama test split and **0.848** averaged across ThermoMPNN's
+5 cross-validation folds, beating a faithfully retrained ThermoMPNN by **+0.066** and **+0.061**
+respectively — winning **5 of 5 folds** and **259 of 298 proteins**, with every confidence interval
+excluding zero.
+
+Establishing that margin required noticing that ThermoMPNN's *released* weights cannot legitimately
+be scored on its own CV folds, because those folds redistribute the proteins it trained on — an
+inflation of +0.076 that reverses the apparent conclusion.
