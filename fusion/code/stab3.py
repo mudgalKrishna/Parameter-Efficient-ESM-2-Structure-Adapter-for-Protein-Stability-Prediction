@@ -72,7 +72,7 @@ p.add_argument("--fuse_mode", default="concat", choices=["concat", "xattn"])
 p.add_argument("--aug_eps", type=float, default=0.0)
 p.add_argument("--tta", type=int, default=0)             # extra noisy passes averaged at predict time
 p.add_argument("--grad_ckpt", type=int, default=0)
-p.add_argument("--split", default="mega")                # mega | cv0..cv4
+p.add_argument("--split", default="mega")                # mega | cv0..cv4 | s669
 p.add_argument("--train_on", default="train", choices=["train", "trainval"])
 p.add_argument("--fixed_epochs", type=int, default=0)    # for train_on=trainval: stop here, no val selection
 p.add_argument("--fireprot", type=int, default=0)        # add the 88 homologue-free FireProt proteins to the fit set
@@ -97,15 +97,23 @@ for sp in ("train", "val", "test"):
     t = np.load(io.BytesIO(z.read(f"tensors/{sp}_tensors.npz")))
     raw[sp] = {k: t[k] for k in t.files}
 FP_TENSORS = "/marimo/work/fireprot_tensors.npz"
+S669_TENSORS = "/marimo/work/s669_tensors.npz"
 fp_raw = None
 if args.fireprot:
     t = np.load(FP_TENSORS, allow_pickle=True)
     fp_raw = {k: t[k] for k in t.files}
     print(f"fireprot: {len(fp_raw['protein_ids'])} proteins, {int(fp_raw['label_mask'].sum())} variants", flush=True)
 
+s6_raw = None
+if args.split == "s669":
+    t = np.load(S669_TENSORS, allow_pickle=True)
+    s6_raw = {k: t[k] for k in t.files}
+    print(f"s669: {len(s6_raw['protein_ids'])} chains, {int(s6_raw['label_mask'].sum())} variants", flush=True)
+
 LMAX = max(d["seq_indices"].shape[1] for d in raw.values())
-if fp_raw is not None:
-    LMAX = max(LMAX, fp_raw["seq_indices"].shape[1])
+for extra in (fp_raw, s6_raw):
+    if extra is not None:
+        LMAX = max(LMAX, extra["seq_indices"].shape[1])
 
 
 def pad(a, L, val=0):
@@ -130,6 +138,20 @@ for sp, d in raw.items():
         store[pid] = dict(seq=seq[i], L=int(d["lengths"][i]), X=co[i], vm=vm[i].astype(np.float32),
                           y=np.nan_to_num(lr[i]), m=lm[i], w=1.0)
 
+s6_pids = []
+if s6_raw is not None:
+    d = s6_raw
+    seq = pad(d["seq_indices"], LMAX, -1)
+    co = pad(np.nan_to_num(d["backbone_coords"]), LMAX)
+    vm = pad(d["residue_valid_mask"], LMAX, False)
+    lr = pad(d["labels_raw"], LMAX)
+    lm = pad(d["label_mask"], LMAX, False)
+    for i, pid in enumerate(d["protein_ids"]):
+        pid = str(pid)
+        s6_pids.append(pid)
+        store[pid] = dict(seq=seq[i], L=int(d["lengths"][i]), X=co[i], vm=vm[i].astype(np.float32),
+                          y=np.nan_to_num(lr[i]), m=lm[i], w=1.0)
+
 fp_pids = []
 if fp_raw is not None:
     d = fp_raw
@@ -146,6 +168,20 @@ if fp_raw is not None:
 
 if args.split == "mega":
     part = {sp: [q for q in pids if orig_split[q] == sp] for sp in ("train", "val", "test")}
+elif args.split == "s669":
+    # Transfer test. Train on mega `train_s669` -- train minus every protein homologous to an
+    # S669 entry (verified: the 7 it drops are exactly the right-hand column of
+    # dataset_splits/s669_vs_megascale_homologues.m8). Select on mega val, which contains none of
+    # them. Score the external S669 benchmark as the test partition.
+    ms = pickle.load(open(SPLITS_PKL, "rb"))
+    base = {}
+    for q in pids:
+        base.setdefault(q.replace(".pdb", ""), q)
+    tr = [base[str(n).replace(".pdb", "")] for n in ms["train_s669"] if str(n).replace(".pdb", "") in base]
+    va = [base[str(n).replace(".pdb", "")] for n in ms["val"] if str(n).replace(".pdb", "") in base]
+    part = {"train": tr, "val": va, "test": s6_pids}
+    print(f"split s669: train {len(tr)} (of {len(ms['train_s669'])}) | val {len(va)} | "
+          f"test {len(s6_pids)} S669 chains", flush=True)
 else:
     k = int(args.split[2:])
     ms = pickle.load(open(SPLITS_PKL, "rb"))

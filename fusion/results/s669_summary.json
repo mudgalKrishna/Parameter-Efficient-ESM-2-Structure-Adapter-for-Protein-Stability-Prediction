@@ -1,0 +1,54 @@
+{
+ "full_s669_ours_only": {
+  "n_variants": 667,
+  "n_chains": 94,
+  "seeds": 3,
+  "pooled_spearman": 0.5304
+ },
+ "matched_comparison": {
+  "n_variants": 588,
+  "n_chains": 84,
+  "ours_pooled_spearman": 0.5963,
+  "thermompnn_retrained_pooled_spearman": 0.514,
+  "delta": 0.0823
+ },
+ "by_length": [
+  {
+   "length_bucket": "<=72 (training range)",
+   "n_variants": 129,
+   "n_chains": 12,
+   "ours_spearman": 0.7991,
+   "thermompnn_retrained_spearman": 0.6858,
+   "delta": 0.1133
+  },
+  {
+   "length_bucket": "73-120",
+   "n_variants": 229,
+   "n_chains": 31,
+   "ours_spearman": 0.6657,
+   "thermompnn_retrained_spearman": 0.5853,
+   "delta": 0.0804
+  },
+  {
+   "length_bucket": "121-200",
+   "n_variants": 148,
+   "n_chains": 27,
+   "ours_spearman": 0.6894,
+   "thermompnn_retrained_spearman": 0.5222,
+   "delta": 0.1672
+  },
+  {
+   "length_bucket": "201+",
+   "n_variants": 82,
+   "n_chains": 14,
+   "ours_spearman": 0.1137,
+   "thermompnn_retrained_spearman": 0.1378,
+   "delta": -0.0241
+  }
+ ],
+ "excluded_by_thermompnn_parser": {
+  "n_variants": 79,
+  "ours_spearman_on_those": -0.0679,
+  "note": "concentrated in long chains where both models fail; see by_length"
+ }
+}

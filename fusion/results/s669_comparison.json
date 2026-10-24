@@ -1,0 +1,19 @@
+{
+ "benchmark": "S669 (external transfer test)",
+ "n_variants_compared": 588,
+ "n_chains": 84,
+ "ours_tag": "T_3B",
+ "ours_seeds": 3,
+ "thermo_seeds": 3,
+ "ours_pooled_spearman": 0.5963,
+ "thermompnn_retrained_pooled_spearman": 0.514,
+ "delta_spearman": 0.0823,
+ "delta_ci95": [
+  0.0294,
+  0.1382
+ ],
+ "frac_bootstrap_favouring_ours": 0.998,
+ "ours_pooled_pearson": 0.5496,
+ "thermompnn_retrained_pooled_pearson": 0.4636,
+ "note": "both sides trained on mega train_s669 (232 proteins, all S669 homologues removed), selected on mega val, scored on the same converted S669 variants"
+}

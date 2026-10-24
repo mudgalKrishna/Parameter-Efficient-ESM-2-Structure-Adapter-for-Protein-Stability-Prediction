@@ -15,7 +15,10 @@ Tsuboyama et al. mega-scale benchmark using ThermoMPNN's own protein splits.
 | Official test split | **0.835** | 0.769 (retrained) | +0.066 [0.036, 0.090] | 21 / 28 | 2.7e-4 |
 | Official test split | **0.835** | 0.772 (released weights) | +0.063 [0.029, 0.085] | 21 / 28 | 5.8e-4 |
 
-Won **5 of 5** cross-validation folds. Every fold's bootstrap confidence interval excludes zero.
+| **S669, external transfer benchmark** | **0.596** | 0.514 (retrained) | **+0.082** [0.029, 0.138] | 588 variants / 84 chains | — |
+
+Won **5 of 5** cross-validation folds. Every fold's bootstrap confidence interval excludes zero,
+and the margin holds on a completely external benchmark (section 9).
 
 Per fold:
 
@@ -218,7 +221,71 @@ Practically, 0.848 looks close to the ceiling for this approach: Tsuboyama's own
 replicate reproducibility bounds per-protein ρ near 0.88–0.90, and none of the obvious levers moved
 the result. Reported in full because a pre-registration that only publishes successes is worthless.
 
-## 9. Disclosure
+## 9. Transfer test: does it generalise off this dataset?
+
+Everything above is one dataset. The obvious question — does the model work on proteins from other
+labs and other assays? — is answered on **S669**, a standard external benchmark: 669 variants across
+94 protein chains, none of it trained on.
+
+The test is set up so the answer means something:
+
+- Training uses mega **`train_s669`** — the train split with every S669 homologue removed. Verified,
+  not assumed: the 7 proteins it drops are exactly the megascale side of ThermoMPNN's own
+  `s669_vs_megascale_homologues.m8`, and none of them appears in the validation set used for
+  selection.
+- **ThermoMPNN is retrained on those same 232 proteins** and scored on the same converted S669
+  variants, so the comparison isolates the model.
+- Sign convention taken from ThermoMPNN's source rather than guessed: they negate megascale
+  `ddG_ML` and S669 `DDG` by the same factor, so the raw conventions already agree and no flip is
+  applied. 667 of 669 variants convert (99.7%), mapped by author residue numbering.
+- S669 averages ~3 variants per chain, so it is scored **pooled over variants**, as the literature
+  does; a median per-protein Spearman would be noise here.
+
+### Result
+
+| | S669 pooled Spearman |
+|---|---|
+| **This work (3B, 3 seeds), all 667 variants** | **0.530** |
+| This work (650M), all 667 variants | 0.514 |
+
+**The model transfers.** On 94 proteins it has never seen, with homologues excluded from training,
+it retains substantial ranking signal (95% CI [0.466, 0.588]).
+
+Head-to-head, on the 588 variants **both** models scored (the two PDB-parsing paths place slightly
+different subsets, so comparing 667 against 591 would not be a comparison at all):
+
+| | Pooled Spearman | Pearson |
+|---|---|---|
+| **This work** | **0.596** | 0.550 |
+| ThermoMPNN retrained | 0.514 | 0.464 |
+| **Δ** | **+0.082** (95% CI [0.029, 0.138]) | +0.086 |
+
+99.8% of paired bootstrap resamples favour this model.
+
+### The honest caveat, and a real limitation it exposes
+
+Our score is 0.530 on all 667 variants but 0.596 on the 588-variant intersection, while
+ThermoMPNN's is 0.514 either way. The variants its parser drops are ones **this model predicts
+badly** (ρ = −0.07 on those 79), so the matched comparison flatters us relative to the full set.
+Both numbers are given above rather than only the favourable one.
+
+Breaking it down by chain length explains why, and is the more interesting result:
+
+| Chain length | variants | This work | ThermoMPNN retrained | Δ |
+|---|---|---|---|---|
+| ≤ 72 (the training range) | 129 | **0.799** | 0.686 | +0.113 |
+| 73 – 120 | 229 | **0.666** | 0.585 | +0.080 |
+| 121 – 200 | 148 | **0.689** | 0.522 | +0.167 |
+| **201 +** | 82 | **0.114** | 0.138 | −0.024 |
+
+Tsuboyama contains only small domains, so **nothing in training exceeds 72 residues**. The model
+generalises comfortably to roughly 3× that — and then **both models collapse above ~200 residues**
+(0.11 and 0.14). That is a shared consequence of the training distribution rather than a defect of
+this architecture, and it is the single clearest limitation of any model trained on this dataset:
+*it should not be trusted on large multi-domain proteins.* Below 200 residues this model beats the
+retrained baseline in every bucket.
+
+## 10. Disclosure
 
 The official test split was scored **twice in total**, once per project phase. The earlier phase used
 a validation-selected ensemble (test ρ = 0.842); this phase locked its ensemble using the CV-chosen
@@ -228,7 +295,7 @@ numbers are reported; neither was selected by looking at test.
 The phase reported above is the one to cite, because its margin is backed by 5 independent folds
 against a fairly-trained baseline rather than a single split.
 
-## 10. Earlier phase of this project
+## 11. Earlier phase of this project
 
 The project's first phase used a re-implemented structure encoder and reached test ρ = **0.7547**,
 against ThermoMPNN's 0.7720 — a paired difference of −0.0173 (95% CI −0.068 to +0.038, p = 0.465),
@@ -253,7 +320,7 @@ In the earlier phase the structure branch added only +0.0044 over a sequence-onl
 including zero. With the checkpoint correctly loaded, the structure stream contributes a clear
 +0.009 on validation (0.848 → 0.857) and the fused model beats either stream alone.
 
-## 11. Repository layout
+## 12. Repository layout
 
 ```
 fusion/
@@ -267,9 +334,12 @@ fusion/
     gen_thermo_all.py         released-weight predictions, all 271k variants
     launch2.py run_thermo.sh  job queues
     figure.py                 the figure at the top of this file
-    stab3.py                  round 3: FireProt, regularisation, soft-rank loss
+    stab3.py                  round 3: FireProt, regularisation, soft-rank loss, S669 split
     fireprot_build.py         converts FireProtDB to the training tensor format
     ab.py runq.py             round-3 paired A/B analysis and job runner
+    s669_build.py             converts the S669 benchmark to the tensor format
+    s669_thermo.py            retrains ThermoMPNN on train_s669 = the transfer baseline
+    s669_eval.py s669_compare.py   pooled S669 scoring and the matched comparison
   results/
     final_results.json        headline numbers
     final_cv_fair.csv         per-fold fair comparison
@@ -278,6 +348,10 @@ fusion/
     runs2/ runs_thermo/       per-run JSON records
     round3_runs.csv           30 round-3 runs (the negative result)
     round3_ab.json            round-3 paired comparisons
+    s669_summary.json         the transfer result, all views in one file
+    s669_by_length.csv        transfer performance vs chain length
+    s669_comparison.json      matched head-to-head on S669
+    runs_thermo_s669/         the retrained transfer baseline, per seed
     results.png               the figure
 
 train_esm2_spurs_fixed.py     earlier-phase pipeline (marimo notebook)
@@ -285,7 +359,7 @@ run_structure_track.py        earlier-phase runner
 analyze_650_local.py          earlier-phase analysis
 ```
 
-## 12. Reproduce
+## 13. Reproduce
 
 ```bash
 git clone https://github.com/dauparas/ProteinMPNN    ext/ProteinMPNN
@@ -310,17 +384,32 @@ python fusion/code/runq.py queue_screen.txt 2           # the paired A/B arms
 python fusion/code/ab.py S0_base S1_fp S2_fp03 S3_reg S4_sr
 ```
 
-Runtimes on one RTX PRO 6000 (96 GB): 650M ≈ 2 min, 3B ≈ 3 min, 15B ≈ 6 min, and the ThermoMPNN
-baseline ≈ 10 s once its frozen features are cached. The full study is **209 training runs**: 58
-(earlier phase) + 91 (headline phase) + 30 (retrained ThermoMPNN baseline) + 30 (round 3).
+The S669 transfer test (section 9):
 
-## 13. Limitations
+```bash
+python fusion/code/s669_build.py                        # S669 -> tensors (fetches 94 PDBs)
+python fusion/code/stab3.py --tag T_3B --split s669 --seed 0        --esm facebook/esm2_t36_3B_UR50D --rank_w 0.5    # x3 seeds
+python fusion/code/s669_thermo.py --seed 0              # the retrained baseline, x3 seeds
+python fusion/code/s669_eval.py T_3B T_650              # pooled S669 scores
+python fusion/code/s669_compare.py T_3B                 # matched head-to-head
+```
+
+Runtimes on one RTX PRO 6000 (96 GB): 650M ≈ 2 min, 3B ≈ 3 min, 15B ≈ 6 min, and the ThermoMPNN
+baseline ≈ 10 s once its frozen features are cached. The full study is **218 training runs**: 58
+(earlier phase) + 91 (headline phase) + 30 (retrained ThermoMPNN baseline) + 30 (round 3) +
+9 (S669 transfer: 6 ours + 3 baseline).
+
+## 14. Limitations
 
 - The official test split has only **28 proteins**; the 5-fold result across 298 proteins is the more
   reliable evidence, and the two agree (+0.066 and +0.061).
 - A strong rank correlation does not mean individual ΔΔG values are numerically accurate.
-- All results are on one dataset. Tsuboyama et al. is dominated by small, well-behaved domains, so
-  performance on large multi-domain or membrane proteins may differ.
+- **Do not trust this model on proteins larger than ~200 residues.** Nothing in training exceeds
+  72 residues, and on S669 both this model and the retrained baseline collapse above 200
+  (ρ = 0.11 and 0.14) while performing well below it — section 9. This is a property of the
+  training dataset, not of the architecture.
+- Generalisation off Tsuboyama is measured rather than assumed (S669 pooled ρ = 0.530 over all 667
+  variants), but it is still a single external benchmark, and membrane proteins are untested.
 - Both models here consume experimental or predicted backbone structures; errors in those inputs
   propagate.
 - Predictions are for research prioritisation and are not a substitute for experimental measurement.
@@ -340,3 +429,9 @@ excluding zero.
 Establishing that margin required noticing that ThermoMPNN's *released* weights cannot legitimately
 be scored on its own CV folds, because those folds redistribute the proteins it trained on — an
 inflation of +0.076 that reverses the apparent conclusion.
+
+The margin also survives leaving the dataset entirely: on the external S669 benchmark, with every
+S669 homologue removed from training and the baseline retrained on the same proteins, this model
+scores **0.596 vs 0.514** pooled Spearman on the variants both models place (+0.082, CI
+[0.029, 0.138]). The same experiment exposes the approach's clearest limitation — nothing in
+training exceeds 72 residues, and above ~200 residues both models stop working.

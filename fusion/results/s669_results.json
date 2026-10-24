@@ -1,0 +1,32 @@
+{
+ "T_3B": {
+  "tag": "T_3B",
+  "seeds": 3,
+  "chains": 94,
+  "variants": 667,
+  "pooled_spearman": 0.5304,
+  "pooled_pearson": 0.4958,
+  "ci95_spearman": [
+   0.4662,
+   0.588
+  ],
+  "rmse": 1.4251,
+  "n_chains_ge5": 27,
+  "median_per_chain_spearman": 0.6494
+ },
+ "T_650": {
+  "tag": "T_650",
+  "seeds": 3,
+  "chains": 94,
+  "variants": 667,
+  "pooled_spearman": 0.5135,
+  "pooled_pearson": 0.4704,
+  "ci95_spearman": [
+   0.4446,
+   0.5752
+  ],
+  "rmse": 1.4495,
+  "n_chains_ge5": 27,
+  "median_per_chain_spearman": 0.6
+ }
+}

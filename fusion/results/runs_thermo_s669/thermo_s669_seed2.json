@@ -1,0 +1,15 @@
+{
+ "seed": 2,
+ "best_val_median_spearman": 0.8343,
+ "best_epoch": 2,
+ "n_train_proteins": 232,
+ "n_s669_variants": 591,
+ "s669_pooled_spearman": 0.5078,
+ "s669_pooled_pearson": 0.4638,
+ "s669_ci95_spearman": [
+  0.4454,
+  0.5651
+ ],
+ "s669_rmse": 1.5098,
+ "elapsed_s": 4
+}
