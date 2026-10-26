@@ -102,7 +102,7 @@ def thermompnn_rho(pids, require_full=True):
             pred[r.pos - 1, AA.index(r.mut_aa)] = -r.ddG_pred  # released model: positive = destabilising
         truth_m = TRUTH[pid]["m"]
         m = truth_m & np.isfinite(pred)
-        # only compare where ThermoMPNN covers (essentially) the same variants we score
+        # only compare where ThermoMPNN covers (essentially) the same variants scored here
         if require_full and truth_m.sum() and m.sum() / truth_m.sum() < 0.99:
             continue
         if m.sum() >= 3:

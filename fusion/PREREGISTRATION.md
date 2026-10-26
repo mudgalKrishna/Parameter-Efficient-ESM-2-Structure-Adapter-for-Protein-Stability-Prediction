@@ -16,7 +16,7 @@ advance so the final number is measured, not selected.
    be taken from the validation-selected runs, never tuned against test.
 5. Caveat to state in the write-up: released ThermoMPNN was trained on the mega-split train set, so on
    CV folds some CV-test proteins are inside its training data. CV-fold comparisons against released
-   ThermoMPNN therefore favour ThermoMPNN; our CV numbers are reported as a conservative check, and
+   ThermoMPNN therefore favour ThermoMPNN; my CV numbers are reported as a conservative check, and
    the headline paired comparison stays on the official test split where the released weights are valid.
 
 ## Success criterion

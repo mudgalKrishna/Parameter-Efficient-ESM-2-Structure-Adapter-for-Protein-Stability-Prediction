@@ -1,4 +1,4 @@
-"""Retrain ThermoMPNN's own architecture under our exact protocol, for a fair comparison.
+"""Retrain ThermoMPNN's own architecture under the same protocol, for a fair comparison.
 
 Released ThermoMPNN was trained on the mega-split train proteins, so scoring it on CV folds
 (which repartition all 298 proteins) evaluates it partly on its own training data. This script

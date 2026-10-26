@@ -1,4 +1,4 @@
-"""Final fair comparison: our model vs ThermoMPNN retrained under an identical protocol.
+"""Final fair comparison: this model vs ThermoMPNN retrained under an identical protocol.
 
 Both sides see exactly the same fold-train proteins, select on the same fold-validation, and are
 scored once on the same held-out fold-test proteins. This removes the confound that the *released*
@@ -97,7 +97,7 @@ if rows:
           f"ours {summary['cv_folds']['ours_mean_median']} vs retrained ThermoMPNN "
           f"{summary['cv_folds']['thermo_mean_median']} | mean delta {summary['cv_folds']['mean_delta_median']}")
 
-# official split: our locked ensemble vs released AND retrained ThermoMPNN
+# official split: the locked ensemble vs released AND retrained ThermoMPNN
 lock = W / "selection_locked_before_test_v2.json"
 if lock.exists():
     sel = json.loads(lock.read_text())

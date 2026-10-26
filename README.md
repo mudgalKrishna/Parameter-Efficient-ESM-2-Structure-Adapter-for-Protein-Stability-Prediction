@@ -97,7 +97,7 @@ does, since S669 averages ~3 variants per chain.
 the baseline's 0.514** on the 588 variants both models place (+0.082, CI [0.029, 0.138]; 99.8% of
 paired bootstraps favour it).
 
-*Caveat, stated rather than buried:* our score is 0.530 on all 667 but 0.596 on the intersection,
+*Caveat, stated rather than buried:* my score is 0.530 on all 667 but 0.596 on the intersection,
 while the baseline's is 0.514 either way — the variants its parser drops are ones this model
 predicts badly (ρ = −0.07 on those 79). Chain length explains why:
 
