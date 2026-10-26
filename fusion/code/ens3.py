@@ -13,10 +13,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, "/marimo/work")
+import paths
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ens2 import TRUTH, load, mix, per_prot, thermompnn_rho, paired  # noqa: E402
 
-W = Path("/marimo/work")
+W = paths.WORK
 TRAINVAL_TAG = "R1_rank_trainval"
 
 

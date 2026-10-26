@@ -7,11 +7,13 @@ import json
 from pathlib import Path
 
 import matplotlib
+
+import paths
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
-W = Path("/marimo/work")
+W = paths.WORK
 SURFACE = "#fcfcfb"
 INK = "#0b0b0b"
 INK2 = "#52514e"
@@ -99,6 +101,6 @@ ax.text(0.02, 0.955, f"unseen test: parity\nfolds: +{gap:.3f} inflated",
 ax.axvline(0.5, color=MUTED, lw=1, ls=":", ymax=0.78)
 
 fig.tight_layout(pad=1.6)
-fig.savefig("/marimo/work/results.png", dpi=170, facecolor=SURFACE, bbox_inches="tight")
-print("saved /marimo/work/results.png")
+fig.savefig(paths.FIGURE_PNG, dpi=170, facecolor=SURFACE, bbox_inches="tight")
+print("saved", paths.FIGURE_PNG)
 print("panelA wins", wins, "| panelB folds", folds, "| memorisation gap", round(gap, 4))

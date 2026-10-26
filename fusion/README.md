@@ -14,6 +14,8 @@ just an index of the folder, so there is only one place where numbers are writte
 
 | File | What it does |
 |---|---|
+| `paths.py` | every filesystem path, resolved from `ESM2_*` environment variables |
+| `setup_env.py` | fetches ProteinMPNN, ThermoMPNN, the splits, FireProtDB and S669 |
 | `stab2.py` | the fusion model — ESM-2 + LoRA, official ProteinMPNN, transformer fusion |
 | `stab3.py` | round 3: FireProt, regularisation, soft-rank loss, and the S669 split |
 | `thermo_train.py` | retrains ThermoMPNN's `TransferModel` per split — **the fair baseline** |
@@ -49,5 +51,6 @@ just an index of the folder, so there is only one place where numbers are writte
 | `runs2/` `runs_thermo/` `runs_thermo_s669/` | per-run JSON records |
 | `results.png` | the figure |
 
-Paths in the scripts assume the sandbox layout (`/marimo/training_bundle_copy.zip`,
-`/marimo/work/...`). See the repository README for the reproduce steps.
+Paths come from `paths.py`, which reads `ESM2_WORK`, `ESM2_BUNDLE`, `ESM2_EXT` and `ESM2_DATA`
+and defaults to `./work`. Run `python setup_env.py --check` to verify the layout. See the
+repository README for setup and reproduce steps.

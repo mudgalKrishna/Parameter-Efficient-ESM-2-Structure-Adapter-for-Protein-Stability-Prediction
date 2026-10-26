@@ -25,14 +25,16 @@ import torch
 import torch.nn.functional as F
 from scipy.stats import spearmanr
 
-THERMO = Path("/marimo/work/ext/ThermoMPNN")
+import paths
+
+THERMO = paths.THERMOMPNN_DIR
 sys.path.insert(0, str(THERMO))
 from protein_mpnn_utils import parse_PDB, tied_featurize  # noqa: E402
 from transfer_model import TransferModel  # noqa: E402
 
-BUNDLE = "/marimo/training_bundle_copy.zip"
-PDB_DIR = Path("/marimo/work/pdbs")
-SPLITS_PKL = THERMO / "dataset_splits/mega_splits.pkl"
+BUNDLE = paths.BUNDLE
+PDB_DIR = paths.PDB_DIR
+SPLITS_PKL = paths.SPLITS_PKL
 ALPHABET = "ACDEFGHIKLMNPQRSTVWYX"
 AA_IDX = {a: i for i, a in enumerate(ALPHABET)}
 
@@ -48,7 +50,7 @@ args = p.parse_args()
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 dev = "cuda"
-OUT = Path("/marimo/work/runs_thermo")
+OUT = paths.RUNS_THERMO
 OUT.mkdir(parents=True, exist_ok=True)
 
 

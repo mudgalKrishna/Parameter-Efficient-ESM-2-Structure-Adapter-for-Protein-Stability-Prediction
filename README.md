@@ -1,5 +1,17 @@
 # ESM-2 + ProteinMPNN fusion for protein stability (ΔΔG)
 
+```
+        W I L D   T Y P E                    M U T A N T
+    ░░░░██████░░░░                       ░░░░██████░░░░
+    ░███▒▒▒▒▒▒███░                      ░███▒▒▒▒▒▒███░
+    ██▒▒▒████▒▒▒██        L → A          ██▒▒▒██▓▓▒▒▒▒██
+    ██▒▒██████▒▒▒██   ═════════════⮡    ██▒▒██▓░░▓▒▒▒██
+    ░███▒▒▒▒▒▒███░                      ░███▒▒░░▒▒███░
+    ░░░░██████░░░░                       ░░░░██████░░░░
+        folded, stable                      core cavity, destabilised
+                                                 ΔΔG < 0
+```
+
 Predicting how a single amino-acid mutation changes protein stability, on the Tsuboyama et al.
 mega-scale dataset using ThermoMPNN's own protein splits. **Metric: median per-protein Spearman ρ.**
 
@@ -176,6 +188,8 @@ comes from the structure encoder actually loading its pretrained weights, plus t
 fusion/
   README.md  PREREGISTRATION.md  PREREGISTRATION_R3.md
   code/
+    paths.py            every filesystem path, resolved from the environment
+    setup_env.py        fetches the third-party checkpoints and both benchmarks
     stab2.py            the fusion model
     stab3.py            round 3 + the S669 split
     thermo_train.py     retrains ThermoMPNN's TransferModel = the fair baseline
@@ -194,12 +208,26 @@ fusion/
 
 Earlier-phase pipeline: `train_esm2_spurs_fixed.py`, `run_structure_track.py`, `analyze_650_local.py`.
 
+## Setup
+
+```bash
+pip install -r requirements.txt
+
+export ESM2_WORK=/path/to/scratch          # run outputs, caches, derived tensors
+export ESM2_BUNDLE=/path/to/bundle.zip     # the Tsuboyama training bundle
+
+python fusion/code/setup_env.py            # fetches ProteinMPNN, ThermoMPNN, splits, FireProt, S669
+python fusion/code/setup_env.py --check    # confirm the layout before running anything
+```
+
+`fusion/code/paths.py` resolves every path from `ESM2_WORK`, `ESM2_BUNDLE`, `ESM2_EXT` and
+`ESM2_DATA`, with defaults under `./work`. Nothing is hardcoded. `setup_env.py` downloads the
+third-party checkpoints and the two external benchmarks; the Tsuboyama bundle is the one input it
+cannot fetch for you, so point `ESM2_BUNDLE` at your own copy.
+
 ## Reproduce
 
 ```bash
-git clone https://github.com/dauparas/ProteinMPNN    ext/ProteinMPNN
-git clone https://github.com/Kuhlman-Lab/ThermoMPNN  ext/ThermoMPNN
-
 # headline result
 python fusion/code/launch2.py 2          # the sweep from results/queue2.txt
 bash   fusion/code/run_thermo.sh         # retrain the baseline, 5 seeds x 6 splits

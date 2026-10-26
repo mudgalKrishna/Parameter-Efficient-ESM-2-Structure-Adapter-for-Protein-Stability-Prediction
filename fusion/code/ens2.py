@@ -14,9 +14,11 @@ import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr, wilcoxon
 
-W = Path("/marimo/work")
+import paths
+
+W = paths.WORK
 AA = "ACDEFGHIKLMNPQRSTVWY"
-z = zipfile.ZipFile("/marimo/training_bundle_copy.zip")
+z = zipfile.ZipFile(paths.BUNDLE)
 
 # ---- truth, keyed by protein_id (splits pooled; padded to a common length)
 raw = {sp: dict(np.load(io.BytesIO(z.read(f"tensors/{sp}_tensors.npz")))) for sp in ("train", "val", "test")}

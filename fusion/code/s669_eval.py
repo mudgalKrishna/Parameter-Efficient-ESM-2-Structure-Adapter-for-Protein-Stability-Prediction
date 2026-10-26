@@ -17,7 +17,9 @@ from pathlib import Path
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
 
-W = Path("/marimo/work")
+import paths
+
+W = paths.WORK
 S6 = np.load(W / "s669_tensors.npz", allow_pickle=True)
 PIDS = [str(p) for p in S6["protein_ids"]]
 Y, M = S6["labels_raw"], S6["label_mask"]

@@ -16,7 +16,9 @@ from pathlib import Path
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
 
-W = Path("/marimo/work")
+import paths
+
+W = paths.WORK
 AA = "ACDEFGHIKLMNPQRSTVWY"
 TAG = sys.argv[1] if len(sys.argv) > 1 else "T_3B"
 

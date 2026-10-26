@@ -1,9 +1,15 @@
-marimo>=0.9.0
+# Core pipeline (fusion/code). Python 3.10+.
 torch>=2.1.0
 transformers>=4.38.0
 accelerate>=0.27.0
-pandas>=2.0.0
 numpy>=1.24.0
+pandas>=2.0.0
 scipy>=1.10.0
-pyarrow>=12.0.0
+pyarrow>=12.0.0            # the training bundle stores variant tables as parquet
+matplotlib>=3.7.0          # figure.py
+
+# Pulled in by ThermoMPNN's datasets.py / protein_mpnn_utils.py
 biopython>=1.81
+
+# Only needed to open the earlier-phase notebook (train_esm2_spurs_fixed.py)
+marimo>=0.9.0

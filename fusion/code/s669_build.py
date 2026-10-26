@@ -11,12 +11,14 @@ convention that this model trains on. Labels are therefore used **as published, 
 Positions use author residue numbering (`MUT` = e.g. "S11A" -> resSeq "11"), matching
 ThermoMPNN's `resn_list.index(pos)`, not a sequence offset.
 
-Output: /marimo/work/s669_tensors.npz, same keys as tensors/*_tensors.npz in the bundle.
+Output: $ESM2_WORK/s669_tensors.npz, same keys as tensors/*_tensors.npz in the bundle.
 """
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+import paths
 
 AA = "ACDEFGHIKLMNPQRSTVWY"
 AA3 = {
@@ -27,8 +29,8 @@ AA3 = {
 }
 BB = ("N", "CA", "C", "O")
 
-D = Path("/marimo/data_s669")
-OUT = Path("/marimo/work/s669_tensors.npz")
+D = paths.S669_DIR
+OUT = paths.S669_TENSORS
 
 
 def parse_chain(pdb_path, chain):

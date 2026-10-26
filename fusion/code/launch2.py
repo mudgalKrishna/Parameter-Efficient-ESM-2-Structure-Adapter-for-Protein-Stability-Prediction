@@ -4,9 +4,13 @@ import sys
 import time
 from pathlib import Path
 
-Q = Path("/marimo/work/queue2.txt")
-DONE = Path("/marimo/work/queue2_done.txt")
-LOG = Path("/marimo/work/logs2")
+import paths
+
+HERE = Path(__file__).resolve().parent
+
+Q = paths.WORK / "queue2.txt"
+DONE = paths.WORK / "queue2_done.txt"
+LOG = paths.WORK / "logs2"
 LOG.mkdir(parents=True, exist_ok=True)
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 2
 running, started = {}, set(DONE.read_text().split("\n")) if DONE.exists() else set()
@@ -27,5 +31,6 @@ while True:
         seed = j.split("--seed ")[1].split()[0]
         sp = j.split("--split ")[1].split()[0] if "--split " in j else "mega"
         fh = open(LOG / f"{tag}_{sp}_s{seed}.log", "w")
-        running[j] = subprocess.Popen(f"cd /marimo/work && python stab2.py {j}", shell=True, stdout=fh, stderr=subprocess.STDOUT)
+        running[j] = subprocess.Popen([sys.executable, str(HERE / "stab2.py"), *j.split()],
+                                      stdout=fh, stderr=subprocess.STDOUT)
     time.sleep(10)

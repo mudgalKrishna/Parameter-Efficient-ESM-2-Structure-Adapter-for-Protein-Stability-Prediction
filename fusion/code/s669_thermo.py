@@ -26,16 +26,18 @@ import torch
 import torch.nn.functional as F
 from scipy.stats import pearsonr, spearmanr
 
-THERMO = Path("/marimo/work/ext/ThermoMPNN")
+import paths
+
+THERMO = paths.THERMOMPNN_DIR
 sys.path.insert(0, str(THERMO))
 from protein_mpnn_utils import parse_PDB, tied_featurize  # noqa: E402
 from transfer_model import TransferModel  # noqa: E402
 
-BUNDLE = "/marimo/training_bundle_copy.zip"
-PDB_DIR = Path("/marimo/work/pdbs")
-S669_PDB = Path("/marimo/data_s669/pdbs")
-S669_CHAIN_DIR = Path("/marimo/work/pdbs_s669")
-SPLITS_PKL = THERMO / "dataset_splits/mega_splits.pkl"
+BUNDLE = paths.BUNDLE
+PDB_DIR = paths.PDB_DIR
+S669_PDB = paths.S669_PDBS
+S669_CHAIN_DIR = paths.PDB_S669_DIR
+SPLITS_PKL = paths.SPLITS_PKL
 ALPHABET = "ACDEFGHIKLMNPQRSTVWYX"
 AA_IDX = {a: i for i, a in enumerate(ALPHABET)}
 AA = "ACDEFGHIKLMNPQRSTVWY"
@@ -51,7 +53,7 @@ args = p.parse_args()
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 dev = "cuda"
-OUT = Path("/marimo/work/runs_thermo")
+OUT = paths.RUNS_THERMO
 OUT.mkdir(parents=True, exist_ok=True)
 
 
@@ -88,7 +90,7 @@ print({k: len(v) for k, v in part.items()}, flush=True)
 # ---------------------------------------------------------------- S669 side
 # write one single-chain PDB per S669 entry so parse_PDB sees exactly the scored chain
 S669_CHAIN_DIR.mkdir(parents=True, exist_ok=True)
-s6 = pd.read_csv("/marimo/data_s669/s669_clean_dir.csv")
+s6 = pd.read_csv(paths.S669_CSV)
 for tag in s6.PDB.unique():
     pid, chain = tag[:-1], tag[-1]
     dst = S669_CHAIN_DIR / f"{tag}.pdb"

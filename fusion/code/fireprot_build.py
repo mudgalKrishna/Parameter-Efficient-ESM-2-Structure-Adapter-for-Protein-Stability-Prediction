@@ -11,7 +11,7 @@ Two corrections are applied, both verified against the data:
   * scale — FireProt is a different assay with a wider spread, so after negation its labels are
     rescaled to the Tsuboyama training std (mean is left alone; it carries real signal).
 
-Output: /marimo/work/fireprot_tensors.npz, same keys as tensors/*_tensors.npz in the bundle.
+Output: $ESM2_WORK/fireprot_tensors.npz, same keys as tensors/*_tensors.npz in the bundle.
 """
 import io
 import pickle
@@ -20,6 +20,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+import paths
 
 AA = "ACDEFGHIKLMNPQRSTVWY"
 AA3 = {
@@ -31,9 +33,9 @@ AA3 = {
 }
 BB = ("N", "CA", "C", "O")
 
-FP = Path("/marimo/data_fireprot/fireprot_upload")
-BUNDLE = "/marimo/training_bundle_copy.zip"
-OUT = Path("/marimo/work/fireprot_tensors.npz")
+FP = paths.FIREPROT_DIR
+BUNDLE = paths.BUNDLE
+OUT = paths.FP_TENSORS
 
 
 def all_chains(pdb_path):

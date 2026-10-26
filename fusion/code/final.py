@@ -14,11 +14,13 @@ import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
 
-sys.path.insert(0, "/marimo/work")
+import paths
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ens2 import TRUTH, load, mix, per_prot, thermompnn_rho  # noqa: E402
 from ens3 import strategies  # noqa: E402
 
-W = Path("/marimo/work")
+W = paths.WORK
 TRAINVAL_TAG = "R1_rank_trainval"
 
 

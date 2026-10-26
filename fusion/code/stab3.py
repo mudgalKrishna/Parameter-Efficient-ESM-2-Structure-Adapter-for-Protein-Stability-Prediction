@@ -40,12 +40,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 from scipy.stats import spearmanr
 
-sys.path.insert(0, "/marimo/work/ext/ThermoMPNN")
+import paths
+
+sys.path.insert(0, str(paths.THERMOMPNN_DIR))
 from protein_mpnn_utils import ProteinMPNN  # noqa: E402
 
-BUNDLE = "/marimo/training_bundle_copy.zip"
-MPNN_DIR = "/marimo/work/ext/ProteinMPNN/vanilla_model_weights"
-SPLITS_PKL = "/marimo/work/ext/ThermoMPNN/dataset_splits/mega_splits.pkl"
+BUNDLE = paths.BUNDLE
+MPNN_DIR = paths.MPNN_WEIGHTS
+SPLITS_PKL = paths.SPLITS_PKL
 AA = "ACDEFGHIKLMNPQRSTVWY"
 
 p = argparse.ArgumentParser()
@@ -86,7 +88,7 @@ args = p.parse_args()
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 dev = "cuda"
-out_dir = Path(f"/marimo/work/runs3/{args.tag}")
+out_dir = paths.runs_dir("runs3", args.tag)
 out_dir.mkdir(parents=True, exist_ok=True)
 
 
@@ -96,8 +98,8 @@ raw = {}
 for sp in ("train", "val", "test"):
     t = np.load(io.BytesIO(z.read(f"tensors/{sp}_tensors.npz")))
     raw[sp] = {k: t[k] for k in t.files}
-FP_TENSORS = "/marimo/work/fireprot_tensors.npz"
-S669_TENSORS = "/marimo/work/s669_tensors.npz"
+FP_TENSORS = paths.FP_TENSORS
+S669_TENSORS = paths.S669_TENSORS
 fp_raw = None
 if args.fireprot:
     t = np.load(FP_TENSORS, allow_pickle=True)

@@ -13,8 +13,10 @@ import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr, wilcoxon
 
-W = Path("/marimo/work")
-z = zipfile.ZipFile("/marimo/training_bundle_copy.zip")
+import paths
+
+W = paths.WORK
+z = zipfile.ZipFile(paths.BUNDLE)
 D = {}
 for sp in ("val", "test"):
     t = np.load(io.BytesIO(z.read(f"tensors/{sp}_tensors.npz")))

@@ -18,8 +18,10 @@ import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr, wilcoxon
 
-W = Path("/marimo/work")
-BUNDLE = "/marimo/training_bundle_copy.zip"
+import paths
+
+W = paths.WORK
+BUNDLE = paths.BUNDLE
 
 # ---- truth, keyed by protein id
 z = zipfile.ZipFile(BUNDLE)

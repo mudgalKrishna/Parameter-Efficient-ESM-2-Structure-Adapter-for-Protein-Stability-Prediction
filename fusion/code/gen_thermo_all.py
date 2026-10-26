@@ -15,10 +15,12 @@ import numpy as np
 import pandas as pd
 import torch
 
-THERMO = Path(os.environ.get("THERMOMPNN_DIR", "/marimo/work/ext/ThermoMPNN"))
-BUNDLE = Path(os.environ.get("ESM2_BUNDLE", "/marimo/training_bundle_copy.zip"))
-PDB_DIR = Path(os.environ.get("ESM2_PDB_DIR", "/marimo/work/pdbs"))
-OUT = Path(os.environ.get("OUT", "/marimo/work/thermompnn_all_variants.parquet"))
+import paths
+
+THERMO = paths.THERMOMPNN_DIR
+BUNDLE = paths.BUNDLE
+PDB_DIR = paths.PDB_DIR
+OUT = Path(os.environ.get("OUT", paths.WORK / "thermompnn_all_variants.parquet"))
 
 sys.path.insert(0, str(THERMO))
 from protein_mpnn_utils import parse_PDB, tied_featurize  # noqa: E402
@@ -96,7 +98,7 @@ def main():
                "by_split": out.groupby("split").size().to_dict(),
                "pearson_vs_ddG_ML_all": float(pearsonr(ov["ddG_pred"], ov["ddG_ML"])[0]),
                "elapsed_seconds": round(time.time() - t0, 1)}
-    Path("/marimo/work/thermompnn_all_variants_summary.json").write_text(json.dumps(summary, indent=2))
+    (paths.WORK / "thermompnn_all_variants_summary.json").write_text(json.dumps(summary, indent=2))
     print("SUMMARY", json.dumps(summary), flush=True)
 
 

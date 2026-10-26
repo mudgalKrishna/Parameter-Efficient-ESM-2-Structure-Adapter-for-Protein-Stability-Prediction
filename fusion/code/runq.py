@@ -14,7 +14,9 @@ import threading
 import time
 from pathlib import Path
 
-W = Path("/marimo/work")
+import paths
+
+W = paths.WORK
 Q = Path(sys.argv[1])
 NW = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 
