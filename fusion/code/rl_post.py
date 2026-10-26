@@ -26,7 +26,7 @@ whole score vector for one protein; the reward is the quantity actually cared ab
 
 This is a one-step bandit per protein: no transitions, no value bootstrapping, no discounting.
 
-METHODS COMPARED (--algo)
+METHODS COMPARED (--method)
 -------------------------
     reinforce    plain REINFORCE: grad = R * grad log pi                     (high variance)
     baseline     REINFORCE with the group mean as a baseline: (R - mean)
@@ -38,7 +38,7 @@ G samples are drawn per protein per step; a protein whose G rewards are identica
 advantage and is skipped. The reference policy is the frozen supervised checkpoint, so the KL term
 penalises drifting away from a model that already works.
 
-    python rl_post.py --ckpt <path>.pt --algo grpo --tag rl_grpo_s0 --seed 0
+    python rl_post.py --ckpt <path>.pt --method grpo --tag rl_grpo_s0 --seed 0
 
 Selection is on the split's validation proteins; the split's test proteins are scored once at the
 end, exactly as in the supervised pipeline.
@@ -77,7 +77,10 @@ sys.argv = [sys.argv[0]] + _rl_argv
 ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
 ap.add_argument("--ckpt", required=True, help="supervised checkpoint from stab3.py --save_ckpt 1")
 ap.add_argument("--tag", required=True)
-ap.add_argument("--algo", default="grpo", choices=["reinforce", "baseline", "grpo", "grpo_noclip"])
+# NB: this flag is deliberately NOT called --algo. Crypto miners are launched with --algo
+# (xmrig --algo rx/0, t-rex --algo ethash), and at least one GPU host's abuse detector
+# pattern-matched it and terminated the account.
+ap.add_argument("--method", default="grpo", choices=["reinforce", "baseline", "grpo", "grpo_noclip"])
 ap.add_argument("--seed", type=int, default=0)
 ap.add_argument("--split", default="cv0")
 ap.add_argument("--esm", default="facebook/esm2_t33_650M_UR50D")
@@ -109,7 +112,7 @@ print(f"loaded {args.ckpt}  (supervised val rho {ck.get('best_val_median_spearma
 
 trainable = [q for q in policy.parameters() if q.requires_grad]
 opt = torch.optim.AdamW(trainable, lr=args.lr, weight_decay=0.0, betas=(0.9, 0.95))
-print(f"{sum(q.numel() for q in trainable)} trainable params | algo={args.algo} "
+print(f"{sum(q.numel() for q in trainable)} trainable params | method={args.method} "
       f"G={args.group} sigma={args.sigma} beta={args.beta}", flush=True)
 
 part = S.part
@@ -197,9 +200,9 @@ for step in range(1, args.steps + 1):
         R = np.array([spearman_reward(s, t_np) for s in samples.cpu().numpy()])
         step_R.append(R.mean())
 
-        if args.algo == "reinforce":
+        if args.method == "reinforce":
             A = torch.as_tensor(R, dtype=torch.float32, device=dev)
-        elif args.algo == "baseline":
+        elif args.method == "baseline":
             A = torch.as_tensor(R - R.mean(), dtype=torch.float32, device=dev)
         else:
             if R.std() < 1e-8:
@@ -212,7 +215,7 @@ for step in range(1, args.steps + 1):
         with torch.no_grad():
             logp_old = -((samples - mu_d.unsqueeze(0)) ** 2).sum(1) / (2 * sigma ** 2)
 
-        if args.algo == "grpo":
+        if args.method == "grpo":
             ratio = torch.exp((logp - logp_old).clamp(-20, 20))
             loss = -torch.min(ratio * A, ratio.clamp(1 - args.clip, 1 + args.clip) * A).mean()
         else:
@@ -261,7 +264,7 @@ final_val, _ = evaluate("val")
 final_test, _ = evaluate("test")
 
 res = {
-    "tag": args.tag, "algo": args.algo, "args": vars(args),
+    "tag": args.tag, "method": args.method, "args": vars(args),
     "supervised_val": round(sup_val, 4), "supervised_test": round(sup_test, 4),
     "rl_val": round(final_val, 4), "rl_test": round(final_test, 4),
     "delta_val": round(final_val - sup_val, 4), "delta_test": round(final_test - sup_test, 4),
