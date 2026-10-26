@@ -83,7 +83,8 @@ p.add_argument("--lora_dropout", type=float, default=0.0)
 p.add_argument("--head_drop", type=float, default=0.1)
 p.add_argument("--softrank", type=float, default=0.0)    # weight on the soft-rank Spearman surrogate
 p.add_argument("--softrank_tau", type=float, default=0.1)
-args = p.parse_args()
+p.add_argument("--save_ckpt", type=int, default=0)   # write the trained weights, for RL post-training
+args, _ = p.parse_known_args()   # parse_known_args: lets rl_post.py import this module
 
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
@@ -454,47 +455,54 @@ def med_spearman(pred, plist):
     return float(np.median(r))
 
 
-best, best_ep, bad = -1, -1, 0
-best_val = best_test = None
-hist = []
-t0 = time.time()
-stop_at = args.fixed_epochs if (args.train_on == "trainval" and args.fixed_epochs > 0) else args.epochs
-batches = length_batches(fit_pids, args.batch)
-print(f"{len(batches)} length-bucketed batches, max pad {max(store[b[-1]]['L'] for b in batches)}", flush=True)
-for ep in range(stop_at):
-    model.train()
-    tl = 0.0
-    for bi in np.random.permutation(len(batches)):   # shuffle batch order, keep buckets intact
-        chunk = batches[bi]
-        seq, L, X, vm, y, m, w = batch_of(chunk)
-        pred, aux_pred = model(seq, L, X, vm, noise=args.aug_eps if model.training else 0.0)
-        loss = losses(pred.float(), None if aux_pred is None else aux_pred.float(), y, m, X, vm, w)
-        opt.zero_grad(set_to_none=True)
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_([q for g in gp for q in g["params"]], 1.0)
-        opt.step()
-        sched.step()
-        tl += loss.item() * len(chunk)
-    vp = predict(part["val"])
-    vs = med_spearman(vp, part["val"])
-    hist.append({"epoch": ep, "train_loss": tl / nfit, "val_median_spearman": vs, "t": round(time.time() - t0)})
-    print(json.dumps(hist[-1]), flush=True)
-    improved = vs > best
-    if args.train_on == "trainval" and args.fixed_epochs > 0:
-        improved = ep == stop_at - 1  # val is inside the fit set: no selection, just take the last epoch
-    if improved:
-        best, best_ep, bad = vs, ep, 0
-        best_val, best_test = vp, predict(part["test"])
-    else:
-        bad += 1
-        if bad >= args.patience and not (args.train_on == "trainval" and args.fixed_epochs > 0):
-            break
+if __name__ == "__main__":
+    best, best_ep, bad = -1, -1, 0
+    best_val = best_test = None
+    hist = []
+    t0 = time.time()
+    stop_at = args.fixed_epochs if (args.train_on == "trainval" and args.fixed_epochs > 0) else args.epochs
+    batches = length_batches(fit_pids, args.batch)
+    print(f"{len(batches)} length-bucketed batches, max pad {max(store[b[-1]]['L'] for b in batches)}", flush=True)
+    for ep in range(stop_at):
+        model.train()
+        tl = 0.0
+        for bi in np.random.permutation(len(batches)):   # shuffle batch order, keep buckets intact
+            chunk = batches[bi]
+            seq, L, X, vm, y, m, w = batch_of(chunk)
+            pred, aux_pred = model(seq, L, X, vm, noise=args.aug_eps if model.training else 0.0)
+            loss = losses(pred.float(), None if aux_pred is None else aux_pred.float(), y, m, X, vm, w)
+            opt.zero_grad(set_to_none=True)
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_([q for g in gp for q in g["params"]], 1.0)
+            opt.step()
+            sched.step()
+            tl += loss.item() * len(chunk)
+        vp = predict(part["val"])
+        vs = med_spearman(vp, part["val"])
+        hist.append({"epoch": ep, "train_loss": tl / nfit, "val_median_spearman": vs, "t": round(time.time() - t0)})
+        print(json.dumps(hist[-1]), flush=True)
+        improved = vs > best
+        if args.train_on == "trainval" and args.fixed_epochs > 0:
+            improved = ep == stop_at - 1  # val is inside the fit set: no selection, just take the last epoch
+        if improved:
+            best, best_ep, bad = vs, ep, 0
+            best_val, best_test = vp, predict(part["test"])
+        else:
+            bad += 1
+            if bad >= args.patience and not (args.train_on == "trainval" and args.fixed_epochs > 0):
+                break
 
-np.savez_compressed(out_dir / f"{args.split}_seed{args.seed}.npz",
-                    val_pids=np.array(part["val"]), val=best_val.astype(np.float32),
-                    test_pids=np.array(part["test"]), test=best_test.astype(np.float32))
-(out_dir / f"{args.split}_seed{args.seed}.json").write_text(json.dumps(
-    {"args": vars(args), "best_val_median_spearman": best, "best_epoch": best_ep,
-     "n_fit_proteins": nfit, "history": hist}, indent=1))
-print("DONE", args.tag, args.split, args.seed, "best_val", round(best, 4), "epoch", best_ep,
-      "elapsed", round(time.time() - t0), flush=True)
+    if args.save_ckpt:
+        ck = out_dir / f"{args.split}_seed{args.seed}_model.pt"
+        torch.save({"model": model.state_dict(), "args": vars(args),
+                    "best_val_median_spearman": best, "best_epoch": best_ep}, ck)
+        print("saved checkpoint", ck, flush=True)
+
+    np.savez_compressed(out_dir / f"{args.split}_seed{args.seed}.npz",
+                        val_pids=np.array(part["val"]), val=best_val.astype(np.float32),
+                        test_pids=np.array(part["test"]), test=best_test.astype(np.float32))
+    (out_dir / f"{args.split}_seed{args.seed}.json").write_text(json.dumps(
+        {"args": vars(args), "best_val_median_spearman": best, "best_epoch": best_ep,
+         "n_fit_proteins": nfit, "history": hist}, indent=1))
+    print("DONE", args.tag, args.split, args.seed, "best_val", round(best, 4), "epoch", best_ep,
+          "elapsed", round(time.time() - t0), flush=True)
