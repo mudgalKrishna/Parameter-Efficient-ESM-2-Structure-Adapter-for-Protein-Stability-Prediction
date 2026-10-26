@@ -242,6 +242,11 @@ def load_cell_nodes(source: str):
 
 
 def exec_cell(node, G):
+    # Runs one `_cell_*` function body from this project's own marimo notebook
+    # (train_esm2_spurs_fixed.py), parsed from that file with `ast` above. The source is a
+    # fixed path inside this repository -- nothing is fetched, decoded or executed from the
+    # network. This exists because marimo stores cells as functions, and the notebook has to
+    # be driven as a plain script here.
     body = list(node.body)
     while body and isinstance(body[-1], ast.Return):
         body.pop()

@@ -210,6 +210,10 @@ Earlier-phase pipeline: `train_esm2_spurs_fixed.py`, `run_structure_track.py`, `
 
 ## Setup
 
+Before running the sweeps on a hosted GPU, read **[fusion/RUNNING.md](fusion/RUNNING.md)** —
+interactive notebook services often forbid long non-interactive jobs, and GPU-heavy processes
+whose CLI flags resemble mining software get flagged by abuse detectors. Both cost me time.
+
 ```bash
 pip install -r requirements.txt
 
